@@ -3,13 +3,14 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerGeoTools(server: McpServer) {
   server.tool(
     "get_geographic_performance",
     "Get campaign performance broken down by geographic location (country, region, city).",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z
         .string()
@@ -17,7 +18,9 @@ export function registerGeoTools(server: McpServer) {
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
     },
-    async ({ customer_id, days, campaign_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days, campaign_id } = args;
       const dateFilter = buildDateFilter(days);
       const campaignFilter = campaign_id ? `AND campaign.id = ${campaign_id}` : "";
       const query = `
@@ -55,10 +58,12 @@ export function registerGeoTools(server: McpServer) {
     "get_device_performance",
     "Get campaign performance broken down by device type (desktop, mobile, tablet).",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const dateFilter = buildDateFilter(days);
       const query = `
         SELECT

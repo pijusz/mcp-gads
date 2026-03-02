@@ -3,6 +3,7 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAdTools(server: McpServer) {
   server.tool(
@@ -16,10 +17,12 @@ RECOMMENDED WORKFLOW:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const dateFilter = buildDateFilter(days);
       const query = `
         SELECT
@@ -53,9 +56,10 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     "get_ad_creatives",
     "Get ad creative details including RSA headlines, descriptions, and final URLs. Great for creative audits.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
-    async ({ customer_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
       const query = `
         SELECT
           ad_group_ad.ad.id,

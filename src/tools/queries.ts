@@ -3,16 +3,19 @@ import { z } from "zod";
 import { formatCsv, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerQueryTools(server: McpServer) {
   server.tool(
     "execute_gaql_query",
     "Execute a custom GAQL query and return results as a table. Use this for any ad-hoc Google Ads Query Language query.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       query: z.string().describe("Valid GAQL query string"),
     },
-    async ({ customer_id, query }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { query } = args;
       const data = await searchGoogleAds(customer_id, query);
       if (!data.results?.length) {
         return { content: [{ type: "text", text: "No results found for the query." }] };
@@ -36,11 +39,13 @@ EXAMPLE QUERIES:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       query: z.string().describe("Valid GAQL query string"),
       format: z.enum(["table", "json", "csv"]).default("table").describe("Output format"),
     },
-    async ({ customer_id, query, format }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { query, format } = args;
       const data = await searchGoogleAds(customer_id, query);
       if (!data.results?.length) {
         return { content: [{ type: "text", text: "No results found for the query." }] };
@@ -163,9 +168,10 @@ FROM geographic_view WHERE segments.date DURING LAST_30_DAYS ORDER BY metrics.im
     "list_resources",
     "List valid Google Ads API resources that can be used in GAQL FROM clauses.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
-    async ({ customer_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
       const query = `
         SELECT google_ads_field.name, google_ads_field.category, google_ads_field.data_type
         FROM google_ads_field

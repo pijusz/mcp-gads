@@ -3,15 +3,17 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerInsightTools(server: McpServer) {
   server.tool(
     "get_recommendations",
     "Get Google's AI-powered optimization recommendations for the account (bid adjustments, keyword suggestions, budget changes, etc.).",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
-    async ({ customer_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
       const query = `
         SELECT
           recommendation.type,
@@ -49,10 +51,12 @@ export function registerInsightTools(server: McpServer) {
     "get_change_history",
     "Get recent account changes (campaign updates, bid changes, ad modifications, etc.) from the change_event resource.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(7).describe("Number of days to look back (max 30)"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const clampedDays = Math.min(days, 30);
       const end = new Date();
       const start = new Date();

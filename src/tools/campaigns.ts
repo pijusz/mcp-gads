@@ -3,6 +3,7 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerCampaignTools(server: McpServer) {
   server.tool(
@@ -16,13 +17,15 @@ RECOMMENDED WORKFLOW:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z
         .number()
         .default(30)
         .describe("Number of days to look back (7, 14, 30, 90, etc.)"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const dateFilter = buildDateFilter(days);
       const query = `
         SELECT
@@ -57,10 +60,12 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     "get_budget_utilization",
     "Get campaign budget amounts vs actual spend to see budget utilization. Shows whether campaigns are limited by budget.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const dateFilter = buildDateFilter(days);
       const query = `
         SELECT

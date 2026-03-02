@@ -3,6 +3,7 @@ import { z } from "zod";
 import { formatTable } from "../services/format.js";
 import { listAccessibleCustomers, searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAccountTools(server: McpServer) {
   server.tool(
@@ -27,9 +28,10 @@ export function registerAccountTools(server: McpServer) {
     "get_account_currency",
     "Get the currency code for a Google Ads account. Run this before analyzing cost data.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
-    async ({ customer_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
       const query = `SELECT customer.id, customer.currency_code FROM customer LIMIT 1`;
       const data = await searchGoogleAds(customer_id, query);
       const customer = data.results?.[0]?.customer as Record<string, string> | undefined;
@@ -47,9 +49,11 @@ export function registerAccountTools(server: McpServer) {
     {
       customer_id: z
         .string()
-        .describe("Manager (MCC) account ID to query hierarchy from"),
+        .optional()
+        .describe("Manager (MCC) account ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
-    async ({ customer_id }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
       const query = `
         SELECT
           customer_client.client_customer,

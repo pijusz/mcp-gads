@@ -215,6 +215,7 @@ Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | Yes | — | API developer token |
 | `GOOGLE_ADS_CREDENTIALS_PATH` | Yes | — | Path to OAuth client JSON |
 | `GOOGLE_ADS_AUTH_TYPE` | No | `oauth` | `oauth` or `service_account` |
+| `GOOGLE_ADS_CUSTOMER_ID` | No | — | Default customer ID (skips passing it per tool) |
 | `GOOGLE_ADS_LOGIN_CUSTOMER_ID` | No | — | MCC manager account ID |
 | `GOOGLE_ADS_IMPERSONATION_EMAIL` | No | — | Service account impersonation email |
 | `GOOGLE_ADS_ENABLE_MUTATIONS` | No | `false` | Enable write tools |

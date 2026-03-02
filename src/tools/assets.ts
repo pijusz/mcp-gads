@@ -5,16 +5,19 @@ import { z } from "zod";
 import { buildDateFilter } from "../services/format.js";
 import { fetchImageBuffer, searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAssetTools(server: McpServer) {
   server.tool(
     "get_image_assets",
     "Retrieve all image assets in the account including their full-size URLs, dimensions, and file sizes.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       limit: z.number().default(50).describe("Maximum number of image assets to return"),
     },
-    async ({ customer_id, limit }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { limit } = args;
       const query = `
         SELECT
           asset.id,
@@ -59,14 +62,16 @@ export function registerAssetTools(server: McpServer) {
     "download_image_asset",
     "Download a specific image asset by ID to a local directory.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the image asset to download"),
       output_dir: z
         .string()
         .default("./ad_images")
         .describe("Directory to save the downloaded image"),
     },
-    async ({ customer_id, asset_id, output_dir }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { asset_id, output_dir } = args;
       const query = `
         SELECT asset.id, asset.name, asset.image_asset.full_size.url
         FROM asset
@@ -117,14 +122,16 @@ export function registerAssetTools(server: McpServer) {
     "get_asset_usage",
     "Find where specific assets are being used in campaigns and ad groups.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").optional().describe("Optional: specific asset ID to look up"),
       asset_type: z
         .string()
         .default("IMAGE")
         .describe("Asset type: IMAGE, TEXT, VIDEO, etc."),
     },
-    async ({ customer_id, asset_id, asset_type }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { asset_id, asset_type } = args;
       const whereClause = asset_id
         ? `asset.type = '${asset_type}' AND asset.id = ${asset_id}`
         : `asset.type = '${asset_type}'`;
@@ -213,10 +220,12 @@ export function registerAssetTools(server: McpServer) {
     "analyze_image_assets",
     "Analyze image asset performance with metrics like impressions, clicks, conversions, and CTR across campaigns.",
     {
-      customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
+      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
-    async ({ customer_id, days }) => {
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days } = args;
       const dateFilter = buildDateFilter(days);
       const query = `
         SELECT
