@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="mcp-gads" height="52" />
+  <img src="logo.svg" alt="mcp-gads" width="280" />
 </p>
 
 <p align="center">
