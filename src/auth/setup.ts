@@ -131,7 +131,9 @@ async function main() {
   console.log(`\n  Setup complete! You can now run: bun run dev\n`);
 }
 
-main().catch((err) => {
-  console.error("  Setup failed:", err.message);
+try {
+  await main();
+} catch (err) {
+  console.error("  Setup failed:", (err as Error).message);
   process.exit(1);
-});
+}
