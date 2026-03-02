@@ -15,6 +15,10 @@ async function fetchWithRetry(
   url: string,
   { retries = 2, retryDelay = 1000, timeout = 30_000, ...init }: FetchWithRetryOpts = {},
 ): Promise<Response> {
+  if (typeof fetch !== "function") {
+    throw new Error("Global fetch is unavailable. Use Node 18+ or Bun.");
+  }
+
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= retries; attempt++) {

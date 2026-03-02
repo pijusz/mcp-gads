@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import pkg from "../package.json";
 import { deriveTokenPath } from "./auth/oauth.js";
-import { loadEnv } from "./config/env.js";
+import { loadEnv, type Env } from "./config/env.js";
 import { createServer } from "./server.js";
 import { log } from "./utils/logger.js";
 
@@ -19,43 +19,44 @@ if (process.argv[2] === "setup") {
   process.exit(0);
 }
 
-try {
-  loadEnv();
-} catch (err) {
-  log.error("Environment validation failed:", (err as Error).message);
-  process.exit(1);
-}
-
-await validateCredentials();
-
 const server = createServer();
 const transport = new StdioServerTransport();
 
 log.info(`Starting mcp-gads v${VERSION} on stdio`);
 await server.connect(transport);
+void runStartupPreflight();
 
 checkForUpdates();
 
-async function validateCredentials() {
-  const env = loadEnv();
+async function runStartupPreflight() {
+  try {
+    const env = loadEnv();
+    await validateCredentials(env);
+  } catch (err) {
+    log.warn(
+      "Startup preflight warning. MCP server is running, but tool calls may fail until this is fixed:",
+      (err as Error).message,
+    );
+  }
+}
+
+async function validateCredentials(env: Env) {
   const credPath = env.GOOGLE_ADS_CREDENTIALS_PATH;
 
   let raw: string;
   try {
     raw = await readFile(credPath, "utf-8");
   } catch {
-    log.error(`Credentials file not found: ${credPath}`);
-    log.error("Download your OAuth client JSON from Google Cloud Console");
-    log.error("and set GOOGLE_ADS_CREDENTIALS_PATH to its path.");
-    process.exit(1);
+    throw new Error(
+      `Credentials file not found: ${credPath}. Download your OAuth client JSON from Google Cloud Console and set GOOGLE_ADS_CREDENTIALS_PATH.`,
+    );
   }
 
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(raw);
   } catch {
-    log.error(`Credentials file is not valid JSON: ${credPath}`);
-    process.exit(1);
+    throw new Error(`Credentials file is not valid JSON: ${credPath}`);
   }
 
   if (env.GOOGLE_ADS_AUTH_TYPE === "oauth") {
@@ -69,20 +70,23 @@ async function validateCredentials() {
       try {
         await readFile(tokenPath, "utf-8");
       } catch {
-        log.error(`OAuth token file not found: ${tokenPath}`);
-        log.error("Run 'mcp-gads setup' to complete authorization.");
-        process.exit(1);
+        throw new Error(
+          `OAuth token file not found: ${tokenPath}. Run 'mcp-gads setup'.`,
+        );
       }
     } else if (!isTokenFile) {
-      log.error(
+      throw new Error(
         `Credentials file is not a valid OAuth client config or token: ${credPath}`,
       );
-      process.exit(1);
     }
   }
 }
 
 function checkForUpdates() {
+  if (typeof fetch !== "function") {
+    return;
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
 

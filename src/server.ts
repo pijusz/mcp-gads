@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import pkg from "../package.json";
-import { getEnv } from "./config/env.js";
+import { isMutationsEnabledFromProcessEnv } from "./config/env.js";
 import { registerAllTools } from "./tools/index.js";
 
 export function createServer(): McpServer {
@@ -9,8 +9,9 @@ export function createServer(): McpServer {
     version: pkg.version,
   });
 
-  const env = getEnv();
-  registerAllTools(server, env);
+  registerAllTools(server, {
+    GOOGLE_ADS_ENABLE_MUTATIONS: isMutationsEnabledFromProcessEnv() ? "true" : "false",
+  });
 
   return server;
 }
