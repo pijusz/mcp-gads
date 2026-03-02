@@ -140,7 +140,7 @@ Add to your `claude_desktop_config.json`:
 
 </details>
 
-## Tools (27)
+## Tools (28)
 
 ### Account Management
 | Tool | Description |
@@ -154,6 +154,7 @@ Add to your `claude_desktop_config.json`:
 |------|-------------|
 | `execute_gaql_query` | Run any GAQL query (table output) |
 | `run_gaql` | Run GAQL with format options (table/json/csv) |
+| `get_gaql_help` | GAQL reference guide with syntax, resources, and examples |
 | `list_resources` | List valid GAQL FROM clause resources |
 
 ### Campaigns

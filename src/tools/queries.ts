@@ -68,6 +68,98 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
   );
 
   server.tool(
+    "get_gaql_help",
+    "Get a GAQL (Google Ads Query Language) reference guide with syntax, common resources, date filters, and example queries. Call this before writing custom GAQL queries.",
+    {},
+    async () => {
+      const text = `# GAQL Quick Reference
+
+## Syntax
+SELECT <fields> FROM <resource> [WHERE <conditions>] [ORDER BY <field> [ASC|DESC]] [LIMIT <n>]
+
+## Common Resources (FROM clause)
+campaign              — campaign settings, status, bidding
+ad_group              — ad groups within campaigns
+ad_group_ad           — individual ads and their content
+keyword_view          — keyword performance (read-only view)
+ad_group_criterion    — targeting criteria (keywords, audiences)
+campaign_budget       — budget settings and spend
+asset                 — creative assets (images, text, video)
+campaign_asset        — assets linked to campaigns (has metrics)
+ad_group_asset        — assets linked to ad groups (has metrics)
+geographic_view       — performance by location
+search_term_view      — actual search queries triggering ads
+recommendation        — Google's optimization suggestions
+change_event          — account change history (special date filter, see below)
+customer              — account-level settings
+customer_client       — MCC sub-accounts (manager accounts only)
+
+## Key Fields
+### Metrics (require date filter)
+metrics.impressions, metrics.clicks, metrics.ctr,
+metrics.cost_micros (divide by 1,000,000 for currency units),
+metrics.conversions, metrics.conversions_value,
+metrics.average_cpc, metrics.average_cpm
+
+### Segments
+segments.date, segments.device, segments.ad_network_type,
+segments.click_type, segments.conversion_action
+
+## Date Filters
+Standard:  WHERE segments.date DURING LAST_7_DAYS
+           WHERE segments.date DURING LAST_14_DAYS
+           WHERE segments.date DURING LAST_30_DAYS
+           WHERE segments.date DURING LAST_90_DAYS
+Custom:    WHERE segments.date BETWEEN '2025-01-01' AND '2025-01-31'
+Today:     WHERE segments.date DURING TODAY
+Yesterday: WHERE segments.date DURING YESTERDAY
+
+## Special: change_event
+change_event does NOT use segments.date. Use:
+WHERE change_event.change_date_time >= '2025-01-01' AND change_event.change_date_time <= '2025-01-31'
+Max 30-day window. LIMIT is required (max 10,000).
+
+## Example Queries
+
+### Campaign performance last 7 days
+SELECT campaign.name, campaign.status, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions
+FROM campaign WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.cost_micros DESC
+
+### Top keywords by clicks
+SELECT ad_group.name, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type,
+  metrics.impressions, metrics.clicks, metrics.ctr, metrics.average_cpc
+FROM keyword_view WHERE segments.date DURING LAST_30_DAYS ORDER BY metrics.clicks DESC LIMIT 50
+
+### Ad creatives with headlines
+SELECT ad_group_ad.ad.responsive_search_ad.headlines, ad_group_ad.ad.responsive_search_ad.descriptions,
+  ad_group_ad.ad.final_urls, metrics.impressions, metrics.clicks
+FROM ad_group_ad WHERE segments.date DURING LAST_30_DAYS AND ad_group_ad.ad.type = 'RESPONSIVE_SEARCH_AD'
+
+### Search terms triggering ads
+SELECT search_term_view.search_term, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros
+FROM search_term_view WHERE segments.date DURING LAST_14_DAYS ORDER BY metrics.impressions DESC LIMIT 100
+
+### Budget utilization
+SELECT campaign.name, campaign_budget.amount_micros, metrics.cost_micros
+FROM campaign WHERE segments.date DURING LAST_30_DAYS
+
+### Geographic performance
+SELECT geographic_view.country_criterion_id, metrics.impressions, metrics.clicks, metrics.cost_micros
+FROM geographic_view WHERE segments.date DURING LAST_30_DAYS ORDER BY metrics.impressions DESC
+
+## Rules
+- Cost/budget values are in micros: divide by 1,000,000 for currency units
+- Metrics require a date filter (WHERE segments.date ...)
+- No pageSize parameter — API returns up to 10,000 rows per page
+- Use LIMIT to cap results
+- String enums are uppercase: 'ENABLED', 'PAUSED', 'RESPONSIVE_SEARCH_AD'
+- IDs are numeric strings without dashes`;
+
+      return { content: [{ type: "text", text }] };
+    },
+  );
+
+  server.tool(
     "list_resources",
     "List valid Google Ads API resources that can be used in GAQL FROM clauses.",
     {
