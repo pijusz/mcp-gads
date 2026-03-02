@@ -128,7 +128,7 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "google-ads": {
-      "command": "%LOCALAPPDATA%\\mcp-gads.exe",
+      "command": "C:\\Users\\YOU\\AppData\\Local\\mcp-gads.exe",
       "env": {
         "GOOGLE_ADS_DEVELOPER_TOKEN": "your-token",
         "GOOGLE_ADS_CREDENTIALS_PATH": "C:\\path\\to\\credentials.json"
