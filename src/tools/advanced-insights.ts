@@ -378,18 +378,17 @@ export function registerAdvancedInsightTools(server: McpServer) {
           video.id,
           video.title,
           video.duration_millis,
-          metrics.video_views,
-          metrics.video_view_rate,
+          metrics.impressions,
+          metrics.clicks,
+          metrics.cost_micros,
+          metrics.conversions,
           metrics.video_quartile_p25_rate,
           metrics.video_quartile_p50_rate,
           metrics.video_quartile_p75_rate,
-          metrics.video_quartile_p100_rate,
-          metrics.impressions,
-          metrics.clicks,
-          metrics.cost_micros
+          metrics.video_quartile_p100_rate
         FROM video
         WHERE ${dateFilter}
-        ORDER BY metrics.video_views DESC
+        ORDER BY metrics.impressions DESC
         LIMIT 50
       `;
       const data = await searchGoogleAds(customer_id, query);
