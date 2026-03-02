@@ -1,6 +1,6 @@
 {
   "name": "mcp-gads",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Google Ads MCP server — query campaigns, keywords, assets & more via natural language",
   "type": "module",
   "bin": {
