@@ -6,6 +6,14 @@ import { log } from "../utils/logger.js";
 
 const _SCOPES = ["https://www.googleapis.com/auth/adwords"];
 
+/** Derive companion token path from a credentials path (case-insensitive .json). */
+export function deriveTokenPath(credPath: string): string {
+  if (/\.json$/i.test(credPath)) {
+    return credPath.replace(/\.json$/i, "_token.json");
+  }
+  return `${credPath}_token.json`;
+}
+
 interface TokenData {
   access_token?: string;
   refresh_token?: string;
@@ -42,7 +50,7 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
     _client = new OAuth2Client(config.client_id, config.client_secret);
 
     // Look for a token file next to the credentials
-    const tokenPath = credPath.replace(/\.json$/, "_token.json");
+    const tokenPath = deriveTokenPath(credPath);
     try {
       const tokenRaw = await readFile(tokenPath, "utf-8");
       const token: TokenData = JSON.parse(tokenRaw);
@@ -93,9 +101,9 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
   return _client;
 }
 
-async function saveToken(credPath: string, credentials: Record<string, unknown>) {
+async function saveToken(credPath: string, credentials: object) {
   try {
-    const tokenPath = credPath.replace(/\.json$/, "_token.json");
+    const tokenPath = deriveTokenPath(credPath);
     await mkdir(dirname(tokenPath), { recursive: true });
     await writeFile(tokenPath, JSON.stringify(credentials, null, 2));
     log.info("Saved refreshed token to", tokenPath);

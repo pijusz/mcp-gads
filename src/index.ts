@@ -2,6 +2,7 @@
 import { readFile } from "node:fs/promises";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import pkg from "../package.json";
+import { deriveTokenPath } from "./auth/oauth.js";
 import { loadEnv } from "./config/env.js";
 import { createServer } from "./server.js";
 import { log } from "./utils/logger.js";
@@ -64,7 +65,7 @@ async function validateCredentials() {
     const isTokenFile = !!(data as { refresh_token?: unknown }).refresh_token;
 
     if (isClientConfig) {
-      const tokenPath = credPath.replace(/\.json$/, "_token.json");
+      const tokenPath = deriveTokenPath(credPath);
       try {
         await readFile(tokenPath, "utf-8");
       } catch {

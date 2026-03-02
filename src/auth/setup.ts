@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { exec } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { dirname, resolve } from "node:path";
@@ -61,16 +62,16 @@ async function main() {
   console.log(`\n  Opening browser for authorization...\n`);
   console.log(`  If it doesn't open automatically, visit:\n  ${authUrl}\n`);
 
-  // Try to open browser
+  // Try to open browser (exec handles cmd.exe builtins like "start" on Windows)
   const openCmd =
     process.platform === "darwin"
-      ? "open"
+      ? `open ${JSON.stringify(authUrl)}`
       : process.platform === "win32"
-        ? "start"
-        : "xdg-open";
+        ? `start "" ${JSON.stringify(authUrl)}`
+        : `xdg-open ${JSON.stringify(authUrl)}`;
 
   try {
-    Bun.spawn([openCmd, authUrl]);
+    exec(openCmd);
   } catch {}
 
   const code = await new Promise<string>((resolve, reject) => {
@@ -109,7 +110,11 @@ async function main() {
   console.log("  Exchanging authorization code for tokens...");
   const { tokens } = await oauthClient.getToken(code);
 
-  const tokenPath = absPath.replace(/\.json$/, "_token.json");
+  const tokenPath = absPath.replace(/\.json$/i, "_token.json");
+  if (tokenPath === absPath) {
+    console.error("  Error: Credentials path must end with .json");
+    process.exit(1);
+  }
   const tokenData = {
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token,

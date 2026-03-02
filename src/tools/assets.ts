@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { resolve, sep } from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { buildDateFilter } from "../services/format.js";
@@ -91,10 +91,10 @@ export function registerAssetTools(server: McpServer) {
       }
 
       // Validate output directory (prevent path traversal)
-      const baseDir = process.cwd();
+      const baseDir = resolve(process.cwd()) + sep;
       let resolvedDir = resolve(output_dir);
-      if (!resolvedDir.startsWith(baseDir)) {
-        resolvedDir = resolve(baseDir, "ad_images");
+      if (!(resolvedDir + sep).startsWith(baseDir)) {
+        resolvedDir = resolve(process.cwd(), "ad_images");
       }
 
       await mkdir(resolvedDir, { recursive: true });
