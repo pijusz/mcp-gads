@@ -60,7 +60,7 @@ export function registerAssetTools(server: McpServer) {
     "Download a specific image asset by ID to a local directory.",
     {
       customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
-      asset_id: z.string().describe("The ID of the image asset to download"),
+      asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the image asset to download"),
       output_dir: z
         .string()
         .default("./ad_images")
@@ -118,7 +118,7 @@ export function registerAssetTools(server: McpServer) {
     "Find where specific assets are being used in campaigns and ad groups.",
     {
       customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
-      asset_id: z.string().optional().describe("Optional: specific asset ID to look up"),
+      asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").optional().describe("Optional: specific asset ID to look up"),
       asset_type: z
         .string()
         .default("IMAGE")

@@ -154,6 +154,7 @@ export function registerKeywordTools(server: McpServer) {
       customer_id: z.string().describe("Google Ads customer ID (10 digits, no dashes)"),
       campaign_id: z
         .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
     },
@@ -200,6 +201,7 @@ export function registerKeywordTools(server: McpServer) {
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z
         .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
     },
