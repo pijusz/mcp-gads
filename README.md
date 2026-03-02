@@ -35,10 +35,10 @@ This opens your browser, completes OAuth, and saves a refresh token.
 ### 2. Add to Claude Code
 
 ```bash
-claude mcp add --scope user --transport stdio \
+claude mcp add google-ads --scope user --transport stdio \
   -e GOOGLE_ADS_DEVELOPER_TOKEN=your-token \
   -e GOOGLE_ADS_CREDENTIALS_PATH=/path/to/credentials.json \
-  google-ads -- npx -y mcp-gads@latest
+  -- npx -y mcp-gads@latest
 ```
 
 That's it. Restart Claude Code and the tools are available. Every session runs the latest version automatically.
@@ -63,17 +63,17 @@ Download a pre-built binary from [Releases](https://github.com/pijusz/mcp-gads/r
 curl -Lo mcp-gads https://github.com/pijusz/mcp-gads/releases/latest/download/mcp-gads-darwin-arm64
 chmod +x mcp-gads
 sudo mv mcp-gads /usr/local/bin/
-claude mcp add --scope user --transport stdio \
+claude mcp add google-ads --scope user --transport stdio \
   -e GOOGLE_ADS_DEVELOPER_TOKEN=your-token \
   -e GOOGLE_ADS_CREDENTIALS_PATH=/path/to/credentials.json \
-  google-ads -- /usr/local/bin/mcp-gads
+  -- /usr/local/bin/mcp-gads
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/pijusz/mcp-gads/releases/latest/download/mcp-gads-windows-x64.exe" -OutFile "$env:LOCALAPPDATA\mcp-gads.exe"
-claude mcp add --scope user --transport stdio -e GOOGLE_ADS_DEVELOPER_TOKEN=your-token -e GOOGLE_ADS_CREDENTIALS_PATH=C:\path\to\credentials.json google-ads -- "%LOCALAPPDATA%\mcp-gads.exe"
+claude mcp add google-ads --scope user --transport stdio -e GOOGLE_ADS_DEVELOPER_TOKEN=your-token -e GOOGLE_ADS_CREDENTIALS_PATH=C:\path\to\credentials.json -- "%LOCALAPPDATA%\mcp-gads.exe"
 ```
 
 </details>
