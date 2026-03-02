@@ -66,7 +66,6 @@ export interface SearchResult {
 export async function searchGoogleAds(
   customerId: string,
   query: string,
-  pageSize = 10_000,
 ): Promise<SearchResult> {
   const env = getEnv();
   const headers = await getAuthHeaders();
@@ -76,7 +75,7 @@ export async function searchGoogleAds(
   const res = await fetchWithRetry(url, {
     method: "POST",
     headers,
-    body: JSON.stringify({ query, pageSize }),
+    body: JSON.stringify({ query }),
   });
 
   if (!res.ok) {

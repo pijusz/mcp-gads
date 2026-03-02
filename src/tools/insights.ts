@@ -54,7 +54,10 @@ export function registerInsightTools(server: McpServer) {
     },
     async ({ customer_id, days }) => {
       const clampedDays = Math.min(days, 30);
-      const dateFilter = buildDateFilter(clampedDays);
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - clampedDays);
+      const fmt = (d: Date) => d.toISOString().slice(0, 10);
       const query = `
         SELECT
           change_event.change_date_time,
@@ -65,7 +68,7 @@ export function registerInsightTools(server: McpServer) {
           change_event.resource_change_operation,
           campaign.name
         FROM change_event
-        WHERE ${dateFilter}
+        WHERE change_event.change_date_time >= '${fmt(start)}' AND change_event.change_date_time <= '${fmt(end)}'
         ORDER BY change_event.change_date_time DESC
         LIMIT 100
       `;
