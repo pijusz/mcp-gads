@@ -151,7 +151,7 @@ Add to your `claude_desktop_config.json`:
 
 </details>
 
-## Tools (28)
+## Tools (39)
 
 ### Account Management
 | Tool | Description |
@@ -208,6 +208,23 @@ Add to your `claude_desktop_config.json`:
 | `get_recommendations` | Google's AI optimization suggestions |
 | `get_change_history` | Recent account changes |
 
+### Extended Tools (disabled by default)
+Enable with `GOOGLE_ADS_ENABLE_EXTENDED_TOOLS=true`:
+
+| Tool | Description |
+|------|-------------|
+| `get_ad_group_performance` | Ad group metrics with optional campaign filter |
+| `get_conversion_actions` | Conversion actions with settings and performance |
+| `get_account_summary` | Quick dashboard: totals + top 5 campaigns |
+| `get_impression_share` | Competitive position: impression share and lost IS |
+| `get_ad_schedule_performance` | Performance by hour or day of week |
+| `get_audience_performance` | Demographics: age range and gender breakdowns |
+| `get_landing_page_performance` | Landing page URLs with metrics |
+| `get_placement_performance` | Display/PMax placement details |
+| `get_asset_group_performance` | PMax asset group metrics and ad strength |
+| `get_video_performance` | YouTube/video view rates and quartile completion |
+| `get_labels` | Labels and their campaign/ad group assignments |
+
 ### Write Tools (disabled by default)
 Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 
@@ -230,6 +247,8 @@ Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 | `GOOGLE_ADS_LOGIN_CUSTOMER_ID` | No | — | MCC manager account ID |
 | `GOOGLE_ADS_IMPERSONATION_EMAIL` | No | — | Service account impersonation email |
 | `GOOGLE_ADS_ENABLE_MUTATIONS` | No | `false` | Enable write tools |
+| `GOOGLE_ADS_ENABLE_EXTENDED_TOOLS` | No | `false` | Enable extended read tools (11 extra) |
+| `GOOGLE_ADS_ENV_FILE` | No | `.env` | Path to .env file (loaded if present, never overrides existing env) |
 | `GOOGLE_ADS_API_VERSION` | No | `v23` | Google Ads API version |
 
 ## Updates

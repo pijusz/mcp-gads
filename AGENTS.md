@@ -12,7 +12,7 @@ src/
 │   ├── service-account.ts    # Service account JWT auth
 │   └── setup.ts              # Interactive credential helper
 ├── services/
-│   ├── google-ads-api.ts     # Central REST client with retry logic
+│   ├── google-ads-api.ts     # Central REST client with retry logic (searchGoogleAds, searchGoogleAdsFields, etc.)
 │   └── format.ts             # Table/JSON/CSV response formatters
 ├── tools/
 │   ├── index.ts              # Barrel: registers all tools on server
@@ -24,11 +24,16 @@ src/
 │   ├── keywords.ts           # generate_keyword_ideas, get_keyword_volumes, get_quality_scores, get_search_terms
 │   ├── geo.ts                # get_geographic_performance, get_device_performance
 │   ├── insights.ts           # get_recommendations, get_change_history
+│   ├── ad-groups.ts          # get_ad_group_performance (extended)
+│   ├── conversions.ts        # get_conversion_actions (extended)
+│   ├── advanced-insights.ts  # 8 extended tools: account_summary, impression_share, ad_schedule, audience, landing_page, placement, asset_group, video
+│   ├── labels.ts             # get_labels (extended)
 │   └── mutations.ts          # Write tools (disabled by default)
 ├── config/
-│   └── env.ts                # Zod-validated env vars
+│   └── env.ts                # Zod-validated env vars + .env file loading
 └── utils/
     ├── customer-id.ts        # formatCustomerId()
+    ├── resolve-customer-id.ts # resolveCustomerId() — args or GOOGLE_ADS_CUSTOMER_ID fallback
     └── logger.ts             # stderr-only logger
 ```
 
