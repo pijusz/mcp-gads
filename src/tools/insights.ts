@@ -17,12 +17,7 @@ export function registerInsightTools(server: McpServer) {
       const query = `
         SELECT
           recommendation.type,
-          recommendation.impact.base_metrics.impressions,
-          recommendation.impact.base_metrics.clicks,
-          recommendation.impact.base_metrics.cost_micros,
-          recommendation.impact.potential_metrics.impressions,
-          recommendation.impact.potential_metrics.clicks,
-          recommendation.impact.potential_metrics.cost_micros,
+          recommendation.impact,
           recommendation.campaign,
           recommendation.dismissed
         FROM recommendation

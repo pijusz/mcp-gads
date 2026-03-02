@@ -70,9 +70,13 @@ export interface SearchResult {
 export async function searchGoogleAds(
   customerId: string,
   query: string,
+  opts?: { loginCustomerId?: string },
 ): Promise<SearchResult> {
   const env = getEnv();
   const headers = await getAuthHeaders();
+  if (opts?.loginCustomerId) {
+    headers["login-customer-id"] = formatCustomerId(opts.loginCustomerId);
+  }
   const cid = formatCustomerId(customerId);
   const url = `${BASE}/${env.GOOGLE_ADS_API_VERSION}/customers/${cid}/googleAds:search`;
 
@@ -150,6 +154,27 @@ export async function generateKeywordHistoricalMetrics(
   }
 
   return res.json() as Promise<Record<string, unknown>>;
+}
+
+export async function searchGoogleAdsFields(
+  query: string,
+): Promise<SearchResult> {
+  const env = getEnv();
+  const headers = await getAuthHeaders();
+  const url = `${BASE}/${env.GOOGLE_ADS_API_VERSION}/googleAdsFields:search`;
+
+  const res = await fetchWithRetry(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ query }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GoogleAdsField API error (${res.status}): ${text}`);
+  }
+
+  return res.json() as Promise<SearchResult>;
 }
 
 export async function mutateResource(

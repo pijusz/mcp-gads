@@ -66,7 +66,9 @@ export function registerAccountTools(server: McpServer) {
         FROM customer_client
         ORDER BY customer_client.level, customer_client.descriptive_name
       `;
-      const data = await searchGoogleAds(customer_id, query);
+      const data = await searchGoogleAds(customer_id, query, {
+        loginCustomerId: customer_id,
+      });
       if (!data.results?.length) {
         return {
           content: [{ type: "text", text: "No sub-accounts found under this MCC." }],
