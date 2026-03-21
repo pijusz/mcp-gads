@@ -3,6 +3,7 @@
   "version": "0.5.2",
   "description": "Google Ads MCP server — query campaigns, keywords, assets & more via natural language",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "mcp-gads": "dist/index.js"
   },
