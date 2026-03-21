@@ -10,7 +10,10 @@ export function registerQueryTools(server: McpServer) {
     "execute_gaql_query",
     "Execute a custom GAQL query and return results as a table. Use this for any ad-hoc Google Ads Query Language query.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       query: z.string().describe("Valid GAQL query string"),
     },
     async (args) => {
@@ -39,7 +42,10 @@ EXAMPLE QUERIES:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       query: z.string().describe("Valid GAQL query string"),
       format: z.enum(["table", "json", "csv"]).default("table").describe("Output format"),
     },
@@ -168,7 +174,10 @@ FROM geographic_view WHERE segments.date DURING LAST_30_DAYS ORDER BY metrics.im
     "list_resources",
     "List valid Google Ads API resources that can be used in GAQL FROM clauses.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
     async () => {
       const query = `SELECT name, category, data_type WHERE category = 'RESOURCE' ORDER BY name`;

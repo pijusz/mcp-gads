@@ -41,7 +41,10 @@ export function formatTable(results: Record<string, unknown>[], title?: string):
   }
 
   const fields = [...fieldSet.keys()];
-  const widths = new Map(fields.map((f) => [f, Math.max(fieldSet.get(f)!, f.length)]));
+  const widths = new Map(
+    fields.map((f) => [f, Math.max(fieldSet.get(f) ?? f.length, f.length)]),
+  );
+  const getWidth = (field: string) => widths.get(field) ?? field.length;
 
   const lines: string[] = [];
   if (title) {
@@ -49,14 +52,12 @@ export function formatTable(results: Record<string, unknown>[], title?: string):
     lines.push("-".repeat(80));
   }
 
-  lines.push(fields.map((f) => f.padEnd(widths.get(f)!)).join(" | "));
-  lines.push(fields.map((f) => "-".repeat(widths.get(f)!)).join("-+-"));
+  lines.push(fields.map((f) => f.padEnd(getWidth(f))).join(" | "));
+  lines.push(fields.map((f) => "-".repeat(getWidth(f))).join("-+-"));
 
   for (const row of results) {
     const pairs = new Map(extractFields(row));
-    lines.push(
-      fields.map((f) => (pairs.get(f) ?? "").padEnd(widths.get(f)!)).join(" | "),
-    );
+    lines.push(fields.map((f) => (pairs.get(f) ?? "").padEnd(getWidth(f))).join(" | "));
   }
 
   return lines.join("\n");

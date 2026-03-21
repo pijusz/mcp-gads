@@ -19,7 +19,8 @@ const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
 async function main() {
   console.log("\n  mcp-gads — Credential Setup\n");
 
-  const credPath = process.argv[3] ?? process.env.GOOGLE_ADS_CREDENTIALS_PATH ?? "./credentials.json";
+  const credPath =
+    process.argv[3] ?? process.env.GOOGLE_ADS_CREDENTIALS_PATH ?? "./credentials.json";
   const absPath = resolve(credPath);
 
   let clientId: string;

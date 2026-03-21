@@ -10,7 +10,10 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_account_summary",
     "Quick account dashboard: total metrics + top 5 campaigns by spend.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
@@ -69,7 +72,9 @@ export function registerAdvancedInsightTools(server: McpServer) {
       }
 
       if (!totals.results?.length && !topCampaigns.results?.length) {
-        return { content: [{ type: "text", text: "No account data found for this period." }] };
+        return {
+          content: [{ type: "text", text: "No account data found for this period." }],
+        };
       }
 
       return { content: [{ type: "text", text: lines.join("\n") }] };
@@ -80,14 +85,19 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_impression_share",
     "Get competitive position metrics: impression share, top/absolute top IS, and lost IS (budget & rank).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z.string().optional().describe("Filter to a specific campaign ID"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const dateFilter = buildDateFilter(args.days);
-      const campaignFilter = args.campaign_id ? `AND campaign.id = ${args.campaign_id}` : "";
+      const campaignFilter = args.campaign_id
+        ? `AND campaign.id = ${args.campaign_id}`
+        : "";
       const query = `
         SELECT
           campaign.id,
@@ -121,7 +131,10 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_ad_schedule_performance",
     "Performance breakdown by hour of day or day of week.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       breakdown: z
         .enum(["day_of_week", "hour"])
@@ -132,8 +145,11 @@ export function registerAdvancedInsightTools(server: McpServer) {
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const dateFilter = buildDateFilter(args.days);
-      const campaignFilter = args.campaign_id ? `AND campaign.id = ${args.campaign_id}` : "";
-      const segment = args.breakdown === "hour" ? "segments.hour" : "segments.day_of_week";
+      const campaignFilter = args.campaign_id
+        ? `AND campaign.id = ${args.campaign_id}`
+        : "";
+      const segment =
+        args.breakdown === "hour" ? "segments.hour" : "segments.day_of_week";
       const query = `
         SELECT
           ${segment},
@@ -164,14 +180,19 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_audience_performance",
     "Performance breakdown by age range and gender demographics.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z.string().optional().describe("Filter to a specific campaign ID"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const dateFilter = buildDateFilter(args.days);
-      const campaignFilter = args.campaign_id ? `AND campaign.id = ${args.campaign_id}` : "";
+      const campaignFilter = args.campaign_id
+        ? `AND campaign.id = ${args.campaign_id}`
+        : "";
 
       const [ageData, genderData] = await Promise.all([
         searchGoogleAds(
@@ -210,10 +231,18 @@ export function registerAdvancedInsightTools(server: McpServer) {
       ];
 
       if (ageData.results?.length) {
-        sections.push("", "By Age Range:", formatTable(ageData.results as Record<string, unknown>[]));
+        sections.push(
+          "",
+          "By Age Range:",
+          formatTable(ageData.results as Record<string, unknown>[]),
+        );
       }
       if (genderData.results?.length) {
-        sections.push("", "By Gender:", formatTable(genderData.results as Record<string, unknown>[]));
+        sections.push(
+          "",
+          "By Gender:",
+          formatTable(genderData.results as Record<string, unknown>[]),
+        );
       }
 
       if (!ageData.results?.length && !genderData.results?.length) {
@@ -228,7 +257,10 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_landing_page_performance",
     "Landing page URLs with performance metrics.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
@@ -263,14 +295,19 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_placement_performance",
     "Where Display and Performance Max ads appeared (websites, apps, YouTube channels).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z.string().optional().describe("Filter to a specific campaign ID"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const dateFilter = buildDateFilter(args.days);
-      const campaignFilter = args.campaign_id ? `AND campaign.id = ${args.campaign_id}` : "";
+      const campaignFilter = args.campaign_id
+        ? `AND campaign.id = ${args.campaign_id}`
+        : "";
 
       const [detailData, pmaxData] = await Promise.all([
         searchGoogleAds(
@@ -308,10 +345,18 @@ export function registerAdvancedInsightTools(server: McpServer) {
       ];
 
       if (detailData.results?.length) {
-        sections.push("", "Display Placements:", formatTable(detailData.results as Record<string, unknown>[]));
+        sections.push(
+          "",
+          "Display Placements:",
+          formatTable(detailData.results as Record<string, unknown>[]),
+        );
       }
       if (pmaxData.results?.length) {
-        sections.push("", "Performance Max Placements:", formatTable(pmaxData.results as Record<string, unknown>[]));
+        sections.push(
+          "",
+          "Performance Max Placements:",
+          formatTable(pmaxData.results as Record<string, unknown>[]),
+        );
       }
 
       if (!detailData.results?.length && !pmaxData.results?.length) {
@@ -326,7 +371,10 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_asset_group_performance",
     "Performance Max asset group metrics including ad strength and status.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
@@ -367,7 +415,10 @@ export function registerAdvancedInsightTools(server: McpServer) {
     "get_video_performance",
     "YouTube and video ad performance metrics including view rates and quartile completion.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {

@@ -107,7 +107,13 @@ export async function listAccessibleCustomers(): Promise<string[]> {
   }
 
   const data = (await res.json()) as { resourceNames?: string[] };
-  return (data.resourceNames ?? []).map((rn) => rn.split("/").pop()!);
+  return (data.resourceNames ?? []).map((rn) => {
+    const id = rn.split("/").pop();
+    if (!id) {
+      throw new Error(`Invalid resource name returned by Google Ads API: ${rn}`);
+    }
+    return id;
+  });
 }
 
 export async function generateKeywordIdeas(
@@ -156,9 +162,7 @@ export async function generateKeywordHistoricalMetrics(
   return res.json() as Promise<Record<string, unknown>>;
 }
 
-export async function searchGoogleAdsFields(
-  query: string,
-): Promise<SearchResult> {
+export async function searchGoogleAdsFields(query: string): Promise<SearchResult> {
   const env = getEnv();
   const headers = await getAuthHeaders();
   const url = `${BASE}/${env.GOOGLE_ADS_API_VERSION}/googleAdsFields:search`;

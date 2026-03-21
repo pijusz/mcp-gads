@@ -4,6 +4,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { buildDateFilter } from "../services/format.js";
 import { fetchImageBuffer, searchGoogleAds } from "../services/google-ads-api.js";
+import type { AssetRow } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
@@ -12,7 +13,10 @@ export function registerAssetTools(server: McpServer) {
     "get_image_assets",
     "Retrieve all image assets in the account including their full-size URLs, dimensions, and file sizes.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       limit: z.number().default(50).describe("Maximum number of image assets to return"),
     },
     async (args) => {
@@ -37,18 +41,18 @@ export function registerAssetTools(server: McpServer) {
       }
 
       const lines = [`Image Assets for ${formatCustomerId(customer_id)}`, "=".repeat(80)];
+      const rows = data.results as AssetRow[];
 
-      for (let i = 0; i < data.results.length; i++) {
-        const r = data.results[i] as Record<string, any>;
-        const asset = r.asset ?? {};
-        const img = asset.imageAsset?.fullSize ?? {};
+      for (let i = 0; i < rows.length; i++) {
+        const asset = rows[i]?.asset;
+        const img = asset?.imageAsset?.fullSize;
 
-        lines.push(`\n${i + 1}. Asset ID: ${asset.id ?? "N/A"}`);
-        lines.push(`   Name: ${asset.name ?? "N/A"}`);
-        if (img.url) lines.push(`   Image URL: ${img.url}`);
-        if (img.widthPixels)
+        lines.push(`\n${i + 1}. Asset ID: ${asset?.id ?? "N/A"}`);
+        lines.push(`   Name: ${asset?.name ?? "N/A"}`);
+        if (img?.url) lines.push(`   Image URL: ${img.url}`);
+        if (img?.widthPixels)
           lines.push(`   Dimensions: ${img.widthPixels} x ${img.heightPixels} px`);
-        const fileSize = asset.imageAsset?.fileSize;
+        const fileSize = asset?.imageAsset?.fileSize;
         if (fileSize)
           lines.push(`   File Size: ${(Number(fileSize) / 1024).toFixed(2)} KB`);
         lines.push("-".repeat(80));
@@ -62,8 +66,14 @@ export function registerAssetTools(server: McpServer) {
     "download_image_asset",
     "Download a specific image asset by ID to a local directory.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
-      asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the image asset to download"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      asset_id: z
+        .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
+        .describe("The ID of the image asset to download"),
       output_dir: z
         .string()
         .default("./ad_images")
@@ -85,8 +95,9 @@ export function registerAssetTools(server: McpServer) {
         };
       }
 
-      const asset = (data.results[0] as Record<string, any>).asset ?? {};
-      const imageUrl = asset.imageAsset?.fullSize?.url;
+      const [row] = data.results as AssetRow[];
+      const asset = row?.asset;
+      const imageUrl = asset?.imageAsset?.fullSize?.url;
       if (!imageUrl) {
         return {
           content: [
@@ -122,8 +133,15 @@ export function registerAssetTools(server: McpServer) {
     "get_asset_usage",
     "Find where specific assets are being used in campaigns and ad groups.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
-      asset_id: z.string().regex(/^\d+$/, "Must be a numeric ID").optional().describe("Optional: specific asset ID to look up"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      asset_id: z
+        .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
+        .optional()
+        .describe("Optional: specific asset ID to look up"),
       asset_type: z
         .string()
         .default("IMAGE")
@@ -172,24 +190,33 @@ export function registerAssetTools(server: McpServer) {
         { name: string; campaigns: string[]; adGroups: string[] }
       >();
 
-      for (const r of assetsData.results) {
-        const a = (r as Record<string, any>).asset ?? {};
-        usageMap.set(a.id, { name: a.name ?? "Unnamed", campaigns: [], adGroups: [] });
+      for (const row of assetsData.results as AssetRow[]) {
+        const asset = row.asset;
+        if (!asset?.id) {
+          continue;
+        }
+        usageMap.set(asset.id, {
+          name: asset.name ?? "Unnamed",
+          campaigns: [],
+          adGroups: [],
+        });
       }
 
-      for (const r of campaignData.results ?? []) {
-        const row = r as Record<string, any>;
+      for (const row of (campaignData.results ?? []) as AssetRow[]) {
         const id = row.asset?.id;
-        if (id && usageMap.has(id)) {
-          usageMap.get(id)?.campaigns.push(`${row.campaign?.name} (${row.campaign?.id})`);
+        const campaignName = row.campaign?.name;
+        const campaignId = row.campaign?.id;
+        if (id && campaignName && campaignId && usageMap.has(id)) {
+          usageMap.get(id)?.campaigns.push(`${campaignName} (${campaignId})`);
         }
       }
 
-      for (const r of adGroupData.results ?? []) {
-        const row = r as Record<string, any>;
+      for (const row of (adGroupData.results ?? []) as AssetRow[]) {
         const id = row.asset?.id;
-        if (id && usageMap.has(id)) {
-          usageMap.get(id)?.adGroups.push(`${row.adGroup?.name} (${row.adGroup?.id})`);
+        const adGroupName = row.adGroup?.name;
+        const adGroupId = row.adGroup?.id;
+        if (id && adGroupName && adGroupId && usageMap.has(id)) {
+          usageMap.get(id)?.adGroups.push(`${adGroupName} (${adGroupId})`);
         }
       }
 
@@ -220,7 +247,10 @@ export function registerAssetTools(server: McpServer) {
     "analyze_image_assets",
     "Analyze image asset performance with metrics like impressions, clicks, conversions, and CTR across campaigns.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
@@ -266,18 +296,21 @@ export function registerAssetTools(server: McpServer) {
         }
       >();
 
-      for (const r of data.results) {
-        const row = r as Record<string, any>;
-        const asset = row.asset ?? {};
-        const id = asset.id;
-        const metrics = row.metrics ?? {};
+      for (const row of data.results as AssetRow[]) {
+        const asset = row.asset;
+        const id = asset?.id;
+        if (!id) {
+          continue;
+        }
+
+        const metrics = row.metrics;
 
         if (!grouped.has(id)) {
-          const img = asset.imageAsset?.fullSize ?? {};
+          const img = asset.imageAsset?.fullSize;
           grouped.set(id, {
             name: asset.name ?? `Asset ${id}`,
-            url: img.url ?? "N/A",
-            dims: `${img.widthPixels ?? "?"} x ${img.heightPixels ?? "?"} px`,
+            url: img?.url ?? "N/A",
+            dims: `${img?.widthPixels ?? "?"} x ${img?.heightPixels ?? "?"} px`,
             impressions: 0,
             clicks: 0,
             conversions: 0,
@@ -286,12 +319,18 @@ export function registerAssetTools(server: McpServer) {
           });
         }
 
-        const g = grouped.get(id)!;
-        g.impressions += Number(metrics.impressions ?? 0);
-        g.clicks += Number(metrics.clicks ?? 0);
-        g.conversions += Number(metrics.conversions ?? 0);
-        g.costMicros += Number(metrics.costMicros ?? 0);
-        if (row.campaign?.name) g.campaigns.add(row.campaign.name);
+        const group = grouped.get(id);
+        if (!group) {
+          continue;
+        }
+
+        group.impressions += Number(metrics?.impressions ?? 0);
+        group.clicks += Number(metrics?.clicks ?? 0);
+        group.conversions += Number(metrics?.conversions ?? 0);
+        group.costMicros += Number(metrics?.costMicros ?? 0);
+        if (row.campaign?.name) {
+          group.campaigns.add(row.campaign.name);
+        }
       }
 
       const sorted = [...grouped.entries()].sort(

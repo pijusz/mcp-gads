@@ -46,7 +46,10 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
 
   if (data.installed || data.web) {
     // This is a client config — we need an existing refresh token or interactive auth
-    const config = (data as ClientConfig).installed ?? (data as ClientConfig).web!;
+    const config = (data as ClientConfig).installed ?? (data as ClientConfig).web;
+    if (!config) {
+      throw new Error(`Credentials file at ${credPath} is missing OAuth client config.`);
+    }
     _client = new OAuth2Client(config.client_id, config.client_secret);
 
     // Look for a token file next to the credentials

@@ -10,7 +10,10 @@ export function registerLabelTools(server: McpServer) {
     "get_labels",
     "List labels and their assignments to campaigns or ad groups.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       type: z
         .enum(["all", "campaign", "ad_group"])
         .default("all")
@@ -34,10 +37,7 @@ export function registerLabelTools(server: McpServer) {
         const data = await searchGoogleAds(customer_id, query);
         if (data.results?.length) {
           sections.push(
-            formatTable(
-              data.results as Record<string, unknown>[],
-              "Campaign Labels",
-            ),
+            formatTable(data.results as Record<string, unknown>[], "Campaign Labels"),
           );
         }
       }
@@ -57,10 +57,7 @@ export function registerLabelTools(server: McpServer) {
         const data = await searchGoogleAds(customer_id, query);
         if (data.results?.length) {
           sections.push(
-            formatTable(
-              data.results as Record<string, unknown>[],
-              "Ad Group Labels",
-            ),
+            formatTable(data.results as Record<string, unknown>[], "Ad Group Labels"),
           );
         }
       }
@@ -78,17 +75,19 @@ export function registerLabelTools(server: McpServer) {
         const data = await searchGoogleAds(customer_id, query);
         if (data.results?.length) {
           sections.push(
-            formatTable(
-              data.results as Record<string, unknown>[],
-              "All Labels",
-            ),
+            formatTable(data.results as Record<string, unknown>[], "All Labels"),
           );
         }
       }
 
       if (sections.length === 0) {
         return {
-          content: [{ type: "text", text: `No labels found for ${formatCustomerId(customer_id)}.` }],
+          content: [
+            {
+              type: "text",
+              text: `No labels found for ${formatCustomerId(customer_id)}.`,
+            },
+          ],
         };
       }
 

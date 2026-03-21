@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
+import type { AdCreativeRow } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
@@ -17,7 +18,10 @@ RECOMMENDED WORKFLOW:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
@@ -56,7 +60,10 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     "get_ad_creatives",
     "Get ad creative details including RSA headlines, descriptions, and final URLs. Great for creative audits.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
@@ -83,19 +90,21 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
 
       const lines = [`Ad Creatives for ${formatCustomerId(customer_id)}`, "=".repeat(80)];
 
-      for (let i = 0; i < data.results.length; i++) {
-        const result = data.results[i] as Record<string, any>;
-        const ad = result.adGroupAd?.ad ?? {};
-        const adGroup = result.adGroup ?? {};
-        const campaign = result.campaign ?? {};
+      const rows = data.results as AdCreativeRow[];
 
-        lines.push(`\n${i + 1}. Campaign: ${campaign.name ?? "N/A"}`);
-        lines.push(`   Ad Group: ${adGroup.name ?? "N/A"}`);
-        lines.push(`   Ad ID: ${ad.id ?? "N/A"}`);
+      for (let i = 0; i < rows.length; i++) {
+        const result = rows[i];
+        const ad = result.adGroupAd?.ad;
+        const adGroup = result.adGroup;
+        const campaign = result.campaign;
+
+        lines.push(`\n${i + 1}. Campaign: ${campaign?.name ?? "N/A"}`);
+        lines.push(`   Ad Group: ${adGroup?.name ?? "N/A"}`);
+        lines.push(`   Ad ID: ${ad?.id ?? "N/A"}`);
         lines.push(`   Status: ${result.adGroupAd?.status ?? "N/A"}`);
-        lines.push(`   Type: ${ad.type ?? "N/A"}`);
+        lines.push(`   Type: ${ad?.type ?? "N/A"}`);
 
-        const rsa = ad.responsiveSearchAd;
+        const rsa = ad?.responsiveSearchAd;
         if (rsa) {
           if (rsa.headlines?.length) {
             lines.push("   Headlines:");
@@ -107,7 +116,7 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
           }
         }
 
-        const urls = ad.finalUrls;
+        const urls = ad?.finalUrls;
         if (urls?.length) lines.push(`   Final URLs: ${urls.join(", ")}`);
         lines.push("-".repeat(80));
       }

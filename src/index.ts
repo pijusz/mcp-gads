@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import pkg from "../package.json";
 import { deriveTokenPath } from "./auth/oauth.js";
-import { loadEnv, type Env } from "./config/env.js";
+import { type Env, loadEnv } from "./config/env.js";
 import { createServer } from "./server.js";
 import { log } from "./utils/logger.js";
 

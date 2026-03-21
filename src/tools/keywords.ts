@@ -6,6 +6,7 @@ import {
   generateKeywordHistoricalMetrics,
   searchGoogleAds,
 } from "../services/google-ads-api.js";
+import type { KeywordIdeaResult, KeywordVolumeResult } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
@@ -14,7 +15,10 @@ export function registerKeywordTools(server: McpServer) {
     "generate_keyword_ideas",
     "Generate keyword ideas using Google Ads Keyword Planner. Returns search volume estimates and keyword suggestions based on seed keywords.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       keywords: z
         .string()
         .describe(
@@ -39,7 +43,7 @@ export function registerKeywordTools(server: McpServer) {
       const { keywords, language_id, country_id, page_size } = args;
       const seedKeywords = keywords
         .split(",")
-        .map((k) => k.trim())
+        .map((k: string) => k.trim())
         .filter(Boolean);
 
       const payload = {
@@ -51,7 +55,7 @@ export function registerKeywordTools(server: McpServer) {
       };
 
       const data = await apiGenerateKeywordIdeas(customer_id, payload);
-      const results = (data.results ?? []) as Record<string, any>[];
+      const results = (data.results ?? []) as KeywordIdeaResult[];
 
       if (!results.length) {
         return {
@@ -95,7 +99,10 @@ export function registerKeywordTools(server: McpServer) {
     "get_keyword_volumes",
     "Get historical search volume metrics for specific keywords. Returns exact volume data (unlike generate_keyword_ideas which suggests related keywords).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       keywords: z.string().describe("Comma-separated keywords to get exact volumes for"),
       language_id: z.string().default("1000").describe("Language criterion ID"),
       country_id: z.string().describe("Geo target criterion ID (2840=US, 2826=UK, etc.)"),
@@ -105,7 +112,7 @@ export function registerKeywordTools(server: McpServer) {
       const { keywords, language_id, country_id } = args;
       const keywordList = keywords
         .split(",")
-        .map((k) => k.trim())
+        .map((k: string) => k.trim())
         .filter(Boolean);
 
       const payload = {
@@ -116,7 +123,7 @@ export function registerKeywordTools(server: McpServer) {
       };
 
       const data = await generateKeywordHistoricalMetrics(customer_id, payload);
-      const results = (data.results ?? []) as Record<string, any>[];
+      const results = (data.results ?? []) as KeywordVolumeResult[];
 
       if (!results.length) {
         return { content: [{ type: "text", text: "No volume data found." }] };
@@ -156,7 +163,10 @@ export function registerKeywordTools(server: McpServer) {
     "get_quality_scores",
     "Get keyword quality scores with component breakdown (expected CTR, ad relevance, landing page experience).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       campaign_id: z
         .string()
         .regex(/^\d+$/, "Must be a numeric ID")
@@ -204,7 +214,10 @@ export function registerKeywordTools(server: McpServer) {
     "get_search_terms",
     "Get actual search queries that triggered your ads (search term report). Shows what users are really searching for.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z
         .string()

@@ -10,14 +10,19 @@ export function registerAdGroupTools(server: McpServer) {
     "get_ad_group_performance",
     "Get ad group performance metrics. Optionally filter by campaign ID.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z.string().optional().describe("Filter to a specific campaign ID"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const dateFilter = buildDateFilter(args.days);
-      const campaignFilter = args.campaign_id ? `AND campaign.id = ${args.campaign_id}` : "";
+      const campaignFilter = args.campaign_id
+        ? `AND campaign.id = ${args.campaign_id}`
+        : "";
       const query = `
         SELECT
           ad_group.id,
@@ -40,7 +45,9 @@ export function registerAdGroupTools(server: McpServer) {
       `;
       const data = await searchGoogleAds(customer_id, query);
       if (!data.results?.length) {
-        return { content: [{ type: "text", text: "No ad group data found for this period." }] };
+        return {
+          content: [{ type: "text", text: "No ad group data found for this period." }],
+        };
       }
       const text = formatTable(
         data.results as Record<string, unknown>[],

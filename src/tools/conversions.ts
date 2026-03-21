@@ -10,7 +10,10 @@ export function registerConversionTools(server: McpServer) {
     "get_conversion_actions",
     "List conversion actions with their settings and recent performance metrics.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {

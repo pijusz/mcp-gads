@@ -28,7 +28,10 @@ export function registerAccountTools(server: McpServer) {
     "get_account_currency",
     "Get the currency code for a Google Ads account. Run this before analyzing cost data.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);

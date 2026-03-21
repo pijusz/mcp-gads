@@ -17,7 +17,10 @@ RECOMMENDED WORKFLOW:
 
 Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z
         .number()
         .default(30)
@@ -60,7 +63,10 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     "get_budget_utilization",
     "Get campaign budget amounts vs actual spend to see budget utilization. Shows whether campaigns are limited by budget.",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {

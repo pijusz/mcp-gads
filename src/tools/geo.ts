@@ -10,7 +10,10 @@ export function registerGeoTools(server: McpServer) {
     "get_geographic_performance",
     "Get campaign performance broken down by geographic location (country, region, city).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
       campaign_id: z
         .string()
@@ -58,7 +61,10 @@ export function registerGeoTools(server: McpServer) {
     "get_device_performance",
     "Get campaign performance broken down by device type (desktop, mobile, tablet).",
     {
-      customer_id: z.string().optional().describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       days: z.number().default(30).describe("Number of days to look back"),
     },
     async (args) => {
