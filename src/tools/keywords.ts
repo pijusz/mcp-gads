@@ -8,10 +8,12 @@ import {
 } from "../services/google-ads-api.js";
 import type { KeywordIdeaResult, KeywordVolumeResult } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerKeywordTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "generate_keyword_ideas",
     "Generate keyword ideas using Google Ads Keyword Planner. Returns search volume estimates and keyword suggestions based on seed keywords.",
     {
@@ -95,7 +97,8 @@ export function registerKeywordTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_keyword_volumes",
     "Get historical search volume metrics for specific keywords. Returns exact volume data (unlike generate_keyword_ideas which suggests related keywords).",
     {
@@ -159,7 +162,8 @@ export function registerKeywordTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_quality_scores",
     "Get keyword quality scores with component breakdown (expected CTR, ad relevance, landing page experience).",
     {
@@ -210,7 +214,8 @@ export function registerKeywordTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_search_terms",
     "Get actual search queries that triggered your ads (search term report). Shows what users are really searching for.",
     {

@@ -3,10 +3,12 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAdGroupTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_ad_group_performance",
     "Get ad group performance metrics. Optionally filter by campaign ID.",
     {

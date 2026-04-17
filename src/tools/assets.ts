@@ -6,10 +6,12 @@ import { buildDateFilter } from "../services/format.js";
 import { fetchImageBuffer, searchGoogleAds } from "../services/google-ads-api.js";
 import type { AssetRow } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAssetTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_image_assets",
     "Retrieve all image assets in the account including their full-size URLs, dimensions, and file sizes.",
     {
@@ -62,7 +64,8 @@ export function registerAssetTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "download_image_asset",
     "Download a specific image asset by ID to a local directory.",
     {
@@ -129,7 +132,8 @@ export function registerAssetTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_asset_usage",
     "Find where specific assets are being used in campaigns and ad groups.",
     {
@@ -243,7 +247,8 @@ export function registerAssetTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "analyze_image_assets",
     "Analyze image asset performance with metrics like impressions, clicks, conversions, and CTR across campaigns.",
     {

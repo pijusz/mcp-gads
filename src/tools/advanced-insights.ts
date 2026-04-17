@@ -3,10 +3,12 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAdvancedInsightTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_account_summary",
     "Quick account dashboard: total metrics + top 5 campaigns by spend.",
     {
@@ -81,7 +83,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_impression_share",
     "Get competitive position metrics: impression share, top/absolute top IS, and lost IS (budget & rank).",
     {
@@ -127,7 +130,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_ad_schedule_performance",
     "Performance breakdown by hour of day or day of week.",
     {
@@ -176,7 +180,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_audience_performance",
     "Performance breakdown by age range and gender demographics.",
     {
@@ -253,7 +258,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_landing_page_performance",
     "Landing page URLs with performance metrics.",
     {
@@ -291,7 +297,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_placement_performance",
     "Where Display and Performance Max ads appeared (websites, apps, YouTube channels).",
     {
@@ -367,7 +374,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_asset_group_performance",
     "Performance Max asset group metrics including ad strength and status.",
     {
@@ -411,7 +419,8 @@ export function registerAdvancedInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_video_performance",
     "YouTube and video ad performance metrics including view rates and quartile completion.",
     {

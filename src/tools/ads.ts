@@ -4,10 +4,12 @@ import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import type { AdCreativeRow } from "../types.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAdTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_ad_performance",
     `Get ad-level performance metrics for the specified time period.
 
@@ -56,7 +58,8 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_ad_creatives",
     "Get ad creative details including RSA headlines, descriptions, and final URLs. Great for creative audits.",
     {

@@ -2,10 +2,12 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { mutateResource } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { writeTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerMutationTools(server: McpServer) {
-  server.tool(
+  writeTool(
+    server,
     "update_campaign_status",
     "⚠️ WRITE OPERATION: Pause or enable a campaign. This modifies your Google Ads account.",
     {
@@ -37,7 +39,8 @@ export function registerMutationTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  writeTool(
+    server,
     "update_ad_group_status",
     "⚠️ WRITE OPERATION: Pause or enable an ad group. This modifies your Google Ads account.",
     {
@@ -69,7 +72,8 @@ export function registerMutationTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  writeTool(
+    server,
     "update_ad_status",
     "⚠️ WRITE OPERATION: Pause or enable an ad. This modifies your Google Ads account.",
     {
@@ -105,7 +109,8 @@ export function registerMutationTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  writeTool(
+    server,
     "update_campaign_budget",
     "⚠️ WRITE OPERATION: Change the daily budget amount for a campaign. Amount is in micros (1,000,000 = 1 unit of currency). This modifies your Google Ads account.",
     {
@@ -142,7 +147,8 @@ export function registerMutationTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  writeTool(
+    server,
     "add_negative_keywords",
     "⚠️ WRITE OPERATION: Add negative keywords to a campaign to prevent ads from showing for those search terms. This modifies your Google Ads account.",
     {

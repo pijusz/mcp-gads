@@ -3,10 +3,12 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerGeoTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_geographic_performance",
     "Get campaign performance broken down by geographic location (country, region, city).",
     {
@@ -57,7 +59,8 @@ export function registerGeoTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_device_performance",
     "Get campaign performance broken down by device type (desktop, mobile, tablet).",
     {

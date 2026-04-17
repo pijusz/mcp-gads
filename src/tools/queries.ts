@@ -3,10 +3,12 @@ import { z } from "zod";
 import { formatCsv, formatTable } from "../services/format.js";
 import { searchGoogleAds, searchGoogleAdsFields } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerQueryTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "execute_gaql_query",
     "Execute a custom GAQL query and return results as a table. Use this for any ad-hoc Google Ads Query Language query.",
     {
@@ -31,7 +33,8 @@ export function registerQueryTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "run_gaql",
     `Execute any GAQL query with output format options (table, json, csv). The most powerful tool for custom Google Ads data queries.
 
@@ -78,7 +81,8 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_gaql_help",
     "Get a GAQL (Google Ads Query Language) reference guide with syntax, common resources, date filters, and example queries. Call this before writing custom GAQL queries.",
     {},
@@ -170,7 +174,8 @@ FROM geographic_view WHERE segments.date DURING LAST_30_DAYS ORDER BY metrics.im
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "list_resources",
     "List valid Google Ads API resources that can be used in GAQL FROM clauses.",
     {

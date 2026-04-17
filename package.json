@@ -1,6 +1,6 @@
 {
   "name": "mcp-gads",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "Google Ads MCP server — query campaigns, keywords, assets & more via natural language",
   "type": "module",
   "main": "dist/index.js",
@@ -46,13 +46,13 @@
   },
   "homepage": "https://github.com/pijusz/mcp-gads#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.27.1",
+    "@modelcontextprotocol/sdk": "1.29.0",
     "google-auth-library": "10.6.2",
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.8",
-    "@types/bun": "1.3.11",
+    "@biomejs/biome": "2.4.12",
+    "@types/bun": "1.3.12",
     "typescript": "5.9.3"
   },
   "mcpName": "io.github.pijusz/mcp-gads"

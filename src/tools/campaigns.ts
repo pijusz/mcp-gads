@@ -3,10 +3,12 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerCampaignTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_campaign_performance",
     `Get campaign performance metrics for the specified time period.
 
@@ -59,7 +61,8 @@ Note: Cost values are in micros (1,000,000 = 1 unit of currency).`,
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_budget_utilization",
     "Get campaign budget amounts vs actual spend to see budget utilization. Shows whether campaigns are limited by budget.",
     {

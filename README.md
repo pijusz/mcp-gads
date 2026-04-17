@@ -89,6 +89,31 @@ claude mcp add google-ads --scope user --transport stdio -e GOOGLE_ADS_DEVELOPER
 
 </details>
 
+### ChatGPT Codex
+
+Codex uses TOML, not JSON. Install once, then add to `~/.codex/config.toml`:
+
+```bash
+npm i -g mcp-gads
+```
+
+```toml
+[mcp_servers.gads]
+command = "mcp-gads"
+
+[mcp_servers.gads.env]
+GOOGLE_ADS_DEVELOPER_TOKEN = "your-token"
+GOOGLE_ADS_CREDENTIALS_PATH = "/absolute/path/to/credentials.json"
+```
+
+Three gotchas that cause silent failures on Codex:
+
+- **Don't use `npx -y` without raising the timeout.** Codex's default `startup_timeout_sec` is 10s, which is too short for npx's first-run download. A global install (above) or the [prebuilt binary](#quick-start) sidesteps this entirely. If you must use npx, add `startup_timeout_sec = 30`.
+- **Env vars must go under `[mcp_servers.gads.env]`.** Codex does not inherit the parent shell environment into stdio servers — exporting vars in your shell won't reach the server.
+- **Use absolute paths** for `GOOGLE_ADS_CREDENTIALS_PATH`. Codex spawns the server with its own cwd, so relative paths silently miss.
+
+On Windows some Codex versions use `startup_timeout_ms = 20000` instead of `_sec`.
+
 ### Claude Desktop
 
 Add to your `claude_desktop_config.json`:

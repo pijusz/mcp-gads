@@ -3,10 +3,12 @@ import { z } from "zod";
 import { formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerInsightTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_recommendations",
     "Get Google's AI-powered optimization recommendations for the account (bid adjustments, keyword suggestions, budget changes, etc.).",
     {
@@ -45,7 +47,8 @@ export function registerInsightTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_change_history",
     "Get recent account changes (campaign updates, bid changes, ad modifications, etc.) from the change_event resource.",
     {

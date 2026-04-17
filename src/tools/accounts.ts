@@ -3,10 +3,12 @@ import { z } from "zod";
 import { formatTable } from "../services/format.js";
 import { listAccessibleCustomers, searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerAccountTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "list_accounts",
     "Lists all accessible Google Ads accounts. Run this first to discover account IDs.",
     {},
@@ -24,7 +26,8 @@ export function registerAccountTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_account_currency",
     "Get the currency code for a Google Ads account. Run this before analyzing cost data.",
     {
@@ -46,7 +49,8 @@ export function registerAccountTools(server: McpServer) {
     },
   );
 
-  server.tool(
+  readTool(
+    server,
     "get_account_hierarchy",
     "Get the MCC account tree showing manager-client relationships via customer_client resource.",
     {

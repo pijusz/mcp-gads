@@ -3,10 +3,12 @@ import { z } from "zod";
 import { formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerLabelTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_labels",
     "List labels and their assignments to campaigns or ad groups.",
     {

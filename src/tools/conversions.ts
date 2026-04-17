@@ -3,10 +3,12 @@ import { z } from "zod";
 import { buildDateFilter, formatTable } from "../services/format.js";
 import { searchGoogleAds } from "../services/google-ads-api.js";
 import { formatCustomerId } from "../utils/customer-id.js";
+import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
 export function registerConversionTools(server: McpServer) {
-  server.tool(
+  readTool(
+    server,
     "get_conversion_actions",
     "List conversion actions with their settings and recent performance metrics.",
     {
