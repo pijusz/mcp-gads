@@ -11,6 +11,21 @@ import { formatCustomerId } from "../utils/customer-id.js";
 import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
+const MAX_ROWS = 10000;
+
+const limitParam = z
+  .number()
+  .default(100)
+  .describe(
+    `Maximum rows to return (1-${MAX_ROWS}). Raise it to reach the long tail — e.g. when cross-referencing against Search Console data. Large values produce large responses`,
+  );
+
+/** Guards the LIMIT clause: this value is interpolated into the query string. */
+export function clampLimit(limit: number): number {
+  if (!Number.isFinite(limit)) return 100;
+  return Math.min(Math.max(1, Math.trunc(limit)), MAX_ROWS);
+}
+
 /**
  * Picks the GenerateKeywordIdeas seed variant from the caller's inputs.
  *
@@ -234,10 +249,12 @@ export function registerKeywordTools(server: McpServer) {
         .regex(/^\d+$/, "Must be a numeric ID")
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
+      limit: limitParam,
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const { campaign_id } = args;
+      const limit = clampLimit(args.limit);
       const campaignFilter = campaign_id ? `AND campaign.id = ${campaign_id}` : "";
       const query = `
         SELECT
@@ -255,7 +272,7 @@ export function registerKeywordTools(server: McpServer) {
         WHERE ad_group_criterion.status = 'ENABLED'
           ${campaignFilter}
         ORDER BY ad_group_criterion.quality_info.quality_score ASC
-        LIMIT 100
+        LIMIT ${limit}
       `;
 
       const data = await searchGoogleAds(customer_id, query);
@@ -287,10 +304,12 @@ export function registerKeywordTools(server: McpServer) {
         .regex(/^\d+$/, "Must be a numeric ID")
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
+      limit: limitParam,
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const { days, campaign_id } = args;
+      const limit = clampLimit(args.limit);
       const dateFilter = buildDateFilter(days);
       const campaignFilter = campaign_id ? `AND campaign.id = ${campaign_id}` : "";
       const query = `
@@ -307,7 +326,7 @@ export function registerKeywordTools(server: McpServer) {
         WHERE ${dateFilter}
           ${campaignFilter}
         ORDER BY metrics.impressions DESC
-        LIMIT 100
+        LIMIT ${limit}
       `;
 
       const data = await searchGoogleAds(customer_id, query);
@@ -337,10 +356,12 @@ export function registerKeywordTools(server: McpServer) {
         .regex(/^\d+$/, "Must be a numeric ID")
         .optional()
         .describe("Optional: filter to a specific campaign ID"),
+      limit: limitParam,
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
       const { days, campaign_id } = args;
+      const limit = clampLimit(args.limit);
       const dateFilter = buildDateFilter(days);
       const campaignFilter = campaign_id ? `AND campaign.id = ${campaign_id}` : "";
       const query = `
@@ -359,7 +380,7 @@ export function registerKeywordTools(server: McpServer) {
         WHERE ${dateFilter}
           ${campaignFilter}
         ORDER BY metrics.combined_clicks DESC
-        LIMIT 100
+        LIMIT ${limit}
       `;
 
       const data = await searchGoogleAds(customer_id, query);

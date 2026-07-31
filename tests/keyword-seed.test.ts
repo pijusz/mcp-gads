@@ -1,5 +1,34 @@
 import { describe, expect, test } from "bun:test";
-import { buildKeywordSeed } from "../src/tools/keywords.js";
+import { buildKeywordSeed, clampLimit } from "../src/tools/keywords.js";
+
+describe("clampLimit", () => {
+  test("passes through valid values", () => {
+    expect(clampLimit(100)).toBe(100);
+    expect(clampLimit(2500)).toBe(2500);
+  });
+
+  test("clamps to the 1..10000 range", () => {
+    expect(clampLimit(0)).toBe(1);
+    expect(clampLimit(-50)).toBe(1);
+    expect(clampLimit(99999)).toBe(10000);
+  });
+
+  test("truncates fractional values", () => {
+    expect(clampLimit(10.9)).toBe(10);
+  });
+
+  test("falls back to 100 for non-finite input", () => {
+    expect(clampLimit(Number.NaN)).toBe(100);
+    expect(clampLimit(Number.POSITIVE_INFINITY)).toBe(100);
+    expect(clampLimit(Number.NEGATIVE_INFINITY)).toBe(100);
+  });
+
+  test("always yields an integer safe to interpolate", () => {
+    for (const v of [1, 3.7, -2, 1e9, 0.4, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(Number.isInteger(clampLimit(v))).toBe(true);
+    }
+  });
+});
 
 describe("buildKeywordSeed", () => {
   test("keywords produce a keywordSeed", () => {
