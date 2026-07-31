@@ -29,6 +29,8 @@ src/
 │   ├── advanced-insights.ts  # account_summary, impression_share, ad_schedule, audience, landing_page, placement, asset_group, video
 │   ├── labels.ts             # get_labels
 │   └── mutations.ts          # Write tools (disabled by default)
+├── prompts/
+│   └── index.ts              # paid_organic_gap — cross-server workflow (mcp-gsc)
 ├── config/
 │   └── env.ts                # Zod-validated env vars + .env file loading
 └── utils/
