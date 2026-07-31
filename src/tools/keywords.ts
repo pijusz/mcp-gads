@@ -11,11 +11,58 @@ import { formatCustomerId } from "../utils/customer-id.js";
 import { readTool } from "../utils/register-tool.js";
 import { resolveCustomerId } from "../utils/resolve-customer-id.js";
 
+/**
+ * Picks the GenerateKeywordIdeas seed variant from the caller's inputs.
+ *
+ * The API accepts exactly one seed, and there is no keyword+site combination —
+ * hence the mutual exclusivity checks rather than merging whatever was passed.
+ */
+export function buildKeywordSeed(input: {
+  keywords?: string;
+  seed_domain?: string;
+  seed_url?: string;
+}): { seed: Record<string, unknown>; label: string } {
+  const { seed_domain, seed_url } = input;
+  const seedKeywords = (input.keywords ?? "")
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+
+  if (seed_domain) {
+    if (seedKeywords.length || seed_url) {
+      throw new Error(
+        "seed_domain cannot be combined with keywords or seed_url — the Keyword Planner API has no keyword+site seed. Use seed_domain alone.",
+      );
+    }
+    return { seed: { siteSeed: { site: seed_domain } }, label: `site ${seed_domain}` };
+  }
+
+  if (seed_url && seedKeywords.length) {
+    return {
+      seed: { keywordAndUrlSeed: { keywords: seedKeywords, url: seed_url } },
+      label: `${seedKeywords.join(", ")} + ${seed_url}`,
+    };
+  }
+
+  if (seed_url) {
+    return { seed: { urlSeed: { url: seed_url } }, label: `url ${seed_url}` };
+  }
+
+  if (seedKeywords.length) {
+    return {
+      seed: { keywordSeed: { keywords: seedKeywords } },
+      label: seedKeywords.join(", "),
+    };
+  }
+
+  throw new Error("Provide at least one of: keywords, seed_domain, or seed_url.");
+}
+
 export function registerKeywordTools(server: McpServer) {
   readTool(
     server,
     "generate_keyword_ideas",
-    "Generate keyword ideas using Google Ads Keyword Planner. Returns search volume estimates and keyword suggestions based on seed keywords.",
+    "Generate keyword ideas using Google Ads Keyword Planner. Seed from keywords, a domain (seed_domain), or a page URL (seed_url). Domain and URL seeds work on sites you do not own — Google returns public information only — which makes this the supported way to research a competitor's keyword surface. Note it reports the keywords Google associates with that site, not proof the advertiser is bidding on them.",
     {
       customer_id: z
         .string()
@@ -23,8 +70,21 @@ export function registerKeywordTools(server: McpServer) {
         .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
       keywords: z
         .string()
+        .optional()
         .describe(
           "Comma-separated seed keywords, e.g. 'running shoes, marathon training'",
+        ),
+      seed_domain: z
+        .string()
+        .optional()
+        .describe(
+          "Domain to seed ideas from, e.g. 'competitor.com'. Covers the whole site. Cannot be combined with keywords or seed_url",
+        ),
+      seed_url: z
+        .string()
+        .optional()
+        .describe(
+          "Specific page URL to crawl for ideas. Can be combined with keywords. Returns nothing if the page is not crawlable — prefer seed_domain for whole-site research",
         ),
       language_id: z
         .string()
@@ -42,14 +102,12 @@ export function registerKeywordTools(server: McpServer) {
     },
     async (args) => {
       const customer_id = resolveCustomerId(args.customer_id);
-      const { keywords, language_id, country_id, page_size } = args;
-      const seedKeywords = keywords
-        .split(",")
-        .map((k: string) => k.trim())
-        .filter(Boolean);
+      const { keywords, seed_domain, seed_url, language_id, country_id, page_size } =
+        args;
+      const { seed, label } = buildKeywordSeed({ keywords, seed_domain, seed_url });
 
       const payload = {
-        keywordSeed: { keywords: seedKeywords },
+        ...seed,
         language: `languageConstants/${language_id}`,
         geoTargetConstants: [`geoTargetConstants/${country_id}`],
         keywordPlanNetwork: "GOOGLE_SEARCH",
@@ -68,7 +126,7 @@ export function registerKeywordTools(server: McpServer) {
       }
 
       const lines = [
-        `Keyword Ideas for: ${seedKeywords.join(", ")}`,
+        `Keyword Ideas for: ${label}`,
         "=".repeat(90),
         `${"Keyword".padEnd(45)} ${"Avg Monthly".padStart(20)} ${"Competition".padStart(12)} ${"Low Bid".padStart(8)} ${"High Bid".padStart(8)}`,
         "-".repeat(90),
