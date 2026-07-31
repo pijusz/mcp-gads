@@ -42,12 +42,12 @@
     "url": "git+https://github.com/pijusz/mcp-gads.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "homepage": "https://github.com/pijusz/mcp-gads#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
-    "google-auth-library": "^10.9.1",
+    "google-auth-library": "^11.0.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

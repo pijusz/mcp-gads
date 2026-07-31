@@ -44,7 +44,7 @@ claude mcp add google-ads --scope user --transport stdio \
 That's it. Restart Claude Code and the tools are available. Every session runs the latest version automatically.
 
 > Also works with `bunx mcp-gads@latest` if you have [Bun](https://bun.sh/).
-> Requires Node 18+ when running via `npx`.
+> Requires Node 22+ when running via `npx`.
 
 If your environment blocks npm registry access at runtime, install once and run the published binary name directly:
 
