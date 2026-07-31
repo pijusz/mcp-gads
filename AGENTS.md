@@ -24,10 +24,10 @@ src/
 │   ├── keywords.ts           # generate_keyword_ideas, get_keyword_volumes, get_quality_scores, get_search_terms
 │   ├── geo.ts                # get_geographic_performance, get_device_performance
 │   ├── insights.ts           # get_recommendations, get_change_history
-│   ├── ad-groups.ts          # get_ad_group_performance (extended)
-│   ├── conversions.ts        # get_conversion_actions (extended)
-│   ├── advanced-insights.ts  # 8 extended tools: account_summary, impression_share, ad_schedule, audience, landing_page, placement, asset_group, video
-│   ├── labels.ts             # get_labels (extended)
+│   ├── ad-groups.ts          # get_ad_group_performance
+│   ├── conversions.ts        # get_conversion_actions
+│   ├── advanced-insights.ts  # account_summary, impression_share, ad_schedule, audience, landing_page, placement, asset_group, video
+│   ├── labels.ts             # get_labels
 │   └── mutations.ts          # Write tools (disabled by default)
 ├── config/
 │   └── env.ts                # Zod-validated env vars + .env file loading

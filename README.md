@@ -233,8 +233,7 @@ Add to your `claude_desktop_config.json`:
 | `get_recommendations` | Google's AI optimization suggestions |
 | `get_change_history` | Recent account changes |
 
-### Extended Tools (disabled by default)
-Enable with `GOOGLE_ADS_ENABLE_EXTENDED_TOOLS=true`:
+### Extended Reporting
 
 | Tool | Description |
 |------|-------------|
@@ -272,7 +271,6 @@ Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 | `GOOGLE_ADS_LOGIN_CUSTOMER_ID` | No | — | MCC manager account ID |
 | `GOOGLE_ADS_IMPERSONATION_EMAIL` | No | — | Service account impersonation email |
 | `GOOGLE_ADS_ENABLE_MUTATIONS` | No | `false` | Enable write tools |
-| `GOOGLE_ADS_ENABLE_EXTENDED_TOOLS` | No | `false` | Enable extended read tools (11 extra) |
 | `GOOGLE_ADS_ENV_FILE` | No | `.env` | Path to .env file (loaded if present, never overrides existing env) |
 | `GOOGLE_ADS_API_VERSION` | No | `v23` | Google Ads API version |
 

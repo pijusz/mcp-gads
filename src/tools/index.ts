@@ -17,7 +17,7 @@ import { registerQueryTools } from "./queries.js";
 
 export function registerAllTools(
   server: McpServer,
-  env: Pick<Env, "GOOGLE_ADS_ENABLE_MUTATIONS" | "GOOGLE_ADS_ENABLE_EXTENDED_TOOLS">,
+  env: Pick<Env, "GOOGLE_ADS_ENABLE_MUTATIONS">,
 ): void {
   registerAccountTools(server);
   registerQueryTools(server);
@@ -27,14 +27,10 @@ export function registerAllTools(
   registerKeywordTools(server);
   registerGeoTools(server);
   registerInsightTools(server);
-
-  if (env.GOOGLE_ADS_ENABLE_EXTENDED_TOOLS === "true") {
-    registerAdGroupTools(server);
-    registerConversionTools(server);
-    registerAdvancedInsightTools(server);
-    registerLabelTools(server);
-    log.info("Extended tools enabled");
-  }
+  registerAdGroupTools(server);
+  registerConversionTools(server);
+  registerAdvancedInsightTools(server);
+  registerLabelTools(server);
 
   if (env.GOOGLE_ADS_ENABLE_MUTATIONS === "true") {
     registerMutationTools(server);

@@ -11,7 +11,6 @@ const envSchema = z.object({
   GOOGLE_ADS_CUSTOMER_ID: z.string().default(""),
   GOOGLE_ADS_IMPERSONATION_EMAIL: z.string().default(""),
   GOOGLE_ADS_ENABLE_MUTATIONS: z.enum(["true", "false"]).default("false"),
-  GOOGLE_ADS_ENABLE_EXTENDED_TOOLS: z.enum(["true", "false"]).default("false"),
   GOOGLE_ADS_API_VERSION: z.string().default("v23"),
 });
 
@@ -86,8 +85,4 @@ export function getEnv(): Env {
 
 export function isMutationsEnabledFromProcessEnv(): boolean {
   return process.env.GOOGLE_ADS_ENABLE_MUTATIONS === "true";
-}
-
-export function isExtendedToolsEnabledFromProcessEnv(): boolean {
-  return process.env.GOOGLE_ADS_ENABLE_EXTENDED_TOOLS === "true";
 }
