@@ -221,6 +221,7 @@ Add to your `claude_desktop_config.json`:
 | `get_quality_scores` | Quality scores with component breakdown |
 | `get_search_terms` | Actual search queries triggering your ads |
 | `get_paid_organic_search_terms` | Paid vs organic clicks per query (needs Search Console link) |
+| `get_search_term_insights` | Search demand categories — the only view into Performance Max & Demand Gen queries |
 
 ### Geographic & Device
 | Tool | Description |

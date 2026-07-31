@@ -343,6 +343,121 @@ export function registerKeywordTools(server: McpServer) {
 
   readTool(
     server,
+    "get_search_term_insights",
+    [
+      "Search demand categories for a campaign — the only way to see what Performance Max and Demand Gen campaigns actually matched, since those never appear in get_search_terms.",
+      "Called with just campaign_id it returns categories with a bucketed monthly search_volume for each.",
+      "Pass category_id (an id from a previous call) to drill into the individual search terms inside one category; search volume is not available at that level.",
+    ].join(" "),
+    {
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      campaign_id: z
+        .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
+        .describe(
+          "Campaign ID. Required — the API only serves this report one campaign at a time",
+        ),
+      category_id: z
+        .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
+        .optional()
+        .describe(
+          "Drill into one category's individual search terms. Use an id returned by a previous call without this argument",
+        ),
+      days: z.number().default(30).describe("Number of days to look back"),
+      limit: limitParam,
+    },
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { campaign_id, category_id, days } = args;
+      const limit = clampLimit(args.limit);
+      const dateFilter = buildDateFilter(days);
+      const campaignFilter = `AND campaign_search_term_insight.campaign_id = ${campaign_id}`;
+
+      if (category_id) {
+        // segments.search_term forbids ORDER BY and LIMIT, and must be selected
+        // alongside segments.search_subcategory — so sort and trim client-side.
+        const query = `
+          SELECT
+            segments.search_term,
+            segments.search_subcategory,
+            metrics.impressions,
+            metrics.clicks,
+            metrics.conversions,
+            metrics.conversions_value
+          FROM campaign_search_term_insight
+          WHERE ${dateFilter}
+            ${campaignFilter}
+            AND campaign_search_term_insight.id = ${category_id}
+        `;
+        const data = await searchGoogleAds(customer_id, query);
+        const rows = (data.results ?? []) as Record<string, unknown>[];
+        if (!rows.length) {
+          return {
+            content: [{ type: "text", text: "No search terms found in that category." }],
+          };
+        }
+        const impressions = (r: Record<string, unknown>) =>
+          Number((r.metrics as { impressions?: string })?.impressions ?? 0);
+        const sorted = [...rows].sort((a, b) => impressions(b) - impressions(a));
+        const shown = sorted.slice(0, limit);
+        const text = formatTable(
+          shown,
+          `Search Terms in Category ${category_id} — campaign ${campaign_id} (last ${days} days)`,
+        );
+        const note =
+          sorted.length > shown.length
+            ? `\n\nShowing top ${shown.length} of ${sorted.length} terms by impressions. Raise limit to see more.`
+            : "";
+        return { content: [{ type: "text", text: text + note }] };
+      }
+
+      const query = `
+        SELECT
+          campaign_search_term_insight.id,
+          campaign_search_term_insight.category_label,
+          metrics.impressions,
+          metrics.clicks,
+          metrics.conversions,
+          metrics.conversions_value,
+          metrics.search_volume
+        FROM campaign_search_term_insight
+        WHERE ${dateFilter}
+          ${campaignFilter}
+        ORDER BY metrics.impressions DESC
+        LIMIT ${limit}
+      `;
+      const data = await searchGoogleAds(customer_id, query);
+      if (!data.results?.length) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No search term insights found. This report covers Search, Shopping, Performance Max and Demand Gen campaigns, and data starts from March 2023.",
+            },
+          ],
+        };
+      }
+      const text = formatTable(
+        data.results as Record<string, unknown>[],
+        `Search Demand Categories for campaign ${campaign_id} (last ${days} days)`,
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `${text}\n\nAn empty category label is the uncategorised bucket. Pass category_id with one of the ids above to see the individual search terms behind a category.`,
+          },
+        ],
+      };
+    },
+  );
+
+  readTool(
+    server,
     "get_paid_organic_search_terms",
     "Compare paid and organic performance for the same search queries. Shows ad clicks next to Search Console organic clicks per query, so you can spot terms you already rank for organically and may be overpaying to advertise on. Requires the Google Ads account to be linked to Search Console.",
     {

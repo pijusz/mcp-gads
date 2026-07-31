@@ -21,7 +21,7 @@ src/
 │   ├── campaigns.ts          # get_campaign_performance, get_budget_utilization
 │   ├── ads.ts                # get_ad_performance, get_ad_creatives
 │   ├── assets.ts             # get_image_assets, download_image_asset, get_asset_usage, analyze_image_assets
-│   ├── keywords.ts           # generate_keyword_ideas, get_keyword_volumes, get_quality_scores, get_search_terms, get_paid_organic_search_terms
+│   ├── keywords.ts           # generate_keyword_ideas, get_keyword_volumes, get_quality_scores, get_search_terms, get_paid_organic_search_terms, get_search_term_insights
 │   ├── geo.ts                # get_geographic_performance, get_device_performance
 │   ├── insights.ts           # get_recommendations, get_change_history
 │   ├── ad-groups.ts          # get_ad_group_performance
