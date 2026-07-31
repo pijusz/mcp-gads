@@ -19,7 +19,7 @@ export type Env = z.infer<typeof envSchema>;
 let _env: Env | null = null;
 let _dotenvLoaded = false;
 
-function loadDotEnvIfPresent(): void {
+export function loadDotEnvIfPresent(): void {
   if (_dotenvLoaded) return;
   _dotenvLoaded = true;
 
@@ -83,6 +83,14 @@ export function getEnv(): Env {
   return _env;
 }
 
-export function isMutationsEnabledFromProcessEnv(): boolean {
+/**
+ * Reads the mutation flag.
+ *
+ * Loads .env first: tool registration happens before loadEnv(), so reading
+ * process.env alone would miss a flag that only exists in the .env file.
+ * loadDotEnvIfPresent() is idempotent, so calling it here is free.
+ */
+export function isMutationsEnabled(): boolean {
+  loadDotEnvIfPresent();
   return process.env.GOOGLE_ADS_ENABLE_MUTATIONS === "true";
 }
