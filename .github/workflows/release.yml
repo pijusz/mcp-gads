@@ -71,6 +71,10 @@ jobs:
         with:
           generate_release_notes: true
           files: artifacts/*/mcp-gads-*
+          # "legacy" weighs semver, not just creation date, so backfilling an
+          # older tag cannot steal the Latest badge. src/index.ts polls
+          # releases/latest, so a wrong badge tells users to downgrade.
+          make_latest: legacy
 
   publish:
     needs: build
