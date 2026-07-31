@@ -321,4 +321,63 @@ export function registerKeywordTools(server: McpServer) {
       return { content: [{ type: "text", text }] };
     },
   );
+
+  readTool(
+    server,
+    "get_paid_organic_search_terms",
+    "Compare paid and organic performance for the same search queries. Shows ad clicks next to Search Console organic clicks per query, so you can spot terms you already rank for organically and may be overpaying to advertise on. Requires the Google Ads account to be linked to Search Console.",
+    {
+      customer_id: z
+        .string()
+        .optional()
+        .describe("Google Ads customer ID. Defaults to GOOGLE_ADS_CUSTOMER_ID env var"),
+      days: z.number().default(30).describe("Number of days to look back"),
+      campaign_id: z
+        .string()
+        .regex(/^\d+$/, "Must be a numeric ID")
+        .optional()
+        .describe("Optional: filter to a specific campaign ID"),
+    },
+    async (args) => {
+      const customer_id = resolveCustomerId(args.customer_id);
+      const { days, campaign_id } = args;
+      const dateFilter = buildDateFilter(days);
+      const campaignFilter = campaign_id ? `AND campaign.id = ${campaign_id}` : "";
+      const query = `
+        SELECT
+          paid_organic_search_term_view.search_term,
+          campaign.name,
+          metrics.impressions,
+          metrics.clicks,
+          metrics.organic_impressions,
+          metrics.organic_clicks,
+          metrics.combined_clicks,
+          metrics.combined_clicks_per_query,
+          metrics.ctr,
+          metrics.average_cpc
+        FROM paid_organic_search_term_view
+        WHERE ${dateFilter}
+          ${campaignFilter}
+        ORDER BY metrics.combined_clicks DESC
+        LIMIT 100
+      `;
+
+      const data = await searchGoogleAds(customer_id, query);
+      if (!data.results?.length) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No paid & organic data found. This report needs the Google Ads account linked to Search Console — check Tools > Linked accounts > Search Console in the Google Ads UI. It also only covers Search campaigns.",
+            },
+          ],
+        };
+      }
+      const text = formatTable(
+        data.results as Record<string, unknown>[],
+        `Paid & Organic Search Terms for ${formatCustomerId(customer_id)} (last ${days} days)`,
+      );
+      return { content: [{ type: "text", text }] };
+    },
+  );
 }

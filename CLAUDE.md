@@ -8,7 +8,7 @@ Google Ads MCP server in Bun/TypeScript. See [AGENTS.md](AGENTS.md) for detailed
 - **Entry:** `src/index.ts`
 - **Build:** `bun run build` → `mcp-gads` (standalone binary), `bun run build:npm` → `dist/index.js`
 - **Test:** `bun test`
-- **API version:** v23 (Google Ads REST API)
+- **API version:** v25 (Google Ads REST API)
 
 ## Key patterns
 

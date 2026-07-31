@@ -11,7 +11,7 @@ const envSchema = z.object({
   GOOGLE_ADS_CUSTOMER_ID: z.string().default(""),
   GOOGLE_ADS_IMPERSONATION_EMAIL: z.string().default(""),
   GOOGLE_ADS_ENABLE_MUTATIONS: z.enum(["true", "false"]).default("false"),
-  GOOGLE_ADS_API_VERSION: z.string().default("v23"),
+  GOOGLE_ADS_API_VERSION: z.string().default("v25"),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -220,6 +220,7 @@ Add to your `claude_desktop_config.json`:
 | `get_keyword_volumes` | Historical search volume for specific keywords |
 | `get_quality_scores` | Quality scores with component breakdown |
 | `get_search_terms` | Actual search queries triggering your ads |
+| `get_paid_organic_search_terms` | Paid vs organic clicks per query (needs Search Console link) |
 
 ### Geographic & Device
 | Tool | Description |
@@ -272,7 +273,7 @@ Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 | `GOOGLE_ADS_IMPERSONATION_EMAIL` | No | — | Service account impersonation email |
 | `GOOGLE_ADS_ENABLE_MUTATIONS` | No | `false` | Enable write tools |
 | `GOOGLE_ADS_ENV_FILE` | No | `.env` | Path to .env file (loaded if present, never overrides existing env) |
-| `GOOGLE_ADS_API_VERSION` | No | `v23` | Google Ads API version |
+| `GOOGLE_ADS_API_VERSION` | No | `v25` | Google Ads API version |
 
 ## Updates
 
