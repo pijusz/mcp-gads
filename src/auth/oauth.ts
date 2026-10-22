@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { OAuth2Client } from "google-auth-library";
 import { getEnv } from "../config/env.js";
@@ -27,18 +27,45 @@ interface ClientConfig {
 }
 
 let _client: OAuth2Client | null = null;
+/** Set when the credentials file itself holds the token (embedded client_id/secret). */
+let _embeddedToken: Record<string, unknown> | null = null;
+
+let _initPromise: Promise<OAuth2Client> | null = null;
+let _refreshPromise: Promise<unknown> | null = null;
 
 export async function getOAuthClient(): Promise<OAuth2Client> {
+  // Concurrent tool calls must share one initialization (and one token refresh).
+  if (_initPromise) {
+    await _initPromise;
+  } else if (!_client) {
+    _initPromise = initOAuthClient();
+    try {
+      return await _initPromise;
+    } catch (e) {
+      _client = null;
+      throw e;
+    } finally {
+      _initPromise = null;
+    }
+  }
   if (_client) {
     // Check if token needs refresh
     const creds = _client.credentials;
     if (creds.expiry_date && creds.expiry_date < Date.now() + 60_000) {
-      log.info("Refreshing expired OAuth token");
-      await _client.refreshAccessToken();
+      if (!_refreshPromise) {
+        log.info("Refreshing expired OAuth token");
+        _refreshPromise = _client.refreshAccessToken().finally(() => {
+          _refreshPromise = null;
+        });
+      }
+      await _refreshPromise;
     }
     return _client;
   }
+  return getOAuthClient();
+}
 
+async function initOAuthClient(): Promise<OAuth2Client> {
   const env = getEnv();
   const credPath = env.GOOGLE_ADS_CREDENTIALS_PATH;
   const raw = await readFile(credPath, "utf-8");
@@ -71,6 +98,7 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
     }
   } else if (data.refresh_token) {
     // This is a saved token with embedded client info
+    _embeddedToken = data;
     _client = new OAuth2Client(data.client_id, data.client_secret);
     _client.setCredentials({
       access_token: data.access_token,
@@ -93,7 +121,7 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
       const res = await _client.refreshAccessToken();
       _client.setCredentials(res.credentials);
       // Persist refreshed token
-      await saveToken(credPath, res.credentials);
+      _embeddedToken = await saveToken(credPath, res.credentials, _embeddedToken);
     } else {
       throw new Error(
         "OAuth token expired and no refresh token available. Run 'mcp-gads setup'.",
@@ -104,15 +132,34 @@ export async function getOAuthClient(): Promise<OAuth2Client> {
   return _client;
 }
 
-async function saveToken(credPath: string, credentials: object) {
+/**
+ * Persist a refreshed token. If the credentials file embeds the token (`embedded` set), merge
+ * into that file; otherwise write the companion `*_token.json`. Returns the new embedded data.
+ */
+export async function saveToken(
+  credPath: string,
+  credentials: object,
+  embedded: Record<string, unknown> | null,
+): Promise<Record<string, unknown> | null> {
   try {
+    if (embedded) {
+      // Token lives in the credentials file itself: merge the refreshed token back into it
+      // (keeping client_id/client_secret) instead of writing a companion file that is never read.
+      const merged = { ...embedded, ...credentials };
+      const tmp = `${credPath}.tmp-${process.pid}-${Date.now()}`;
+      await writeFile(tmp, JSON.stringify(merged, null, 2), { mode: 0o600 });
+      await rename(tmp, credPath);
+      log.info("Saved refreshed token to", credPath);
+      return merged;
+    }
     const tokenPath = deriveTokenPath(credPath);
     await mkdir(dirname(tokenPath), { recursive: true });
-    await writeFile(tokenPath, JSON.stringify(credentials, null, 2));
+    await writeFile(tokenPath, JSON.stringify(credentials, null, 2), { mode: 0o600 });
     log.info("Saved refreshed token to", tokenPath);
   } catch (e) {
     log.warn("Could not save refreshed token:", e);
   }
+  return embedded;
 }
 
 export async function getOAuthAccessToken(): Promise<string> {
