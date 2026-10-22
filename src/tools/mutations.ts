@@ -37,6 +37,7 @@ export function registerMutationTools(server: McpServer) {
         ],
       };
     },
+    { idempotent: true },
   );
 
   writeTool(
@@ -70,6 +71,7 @@ export function registerMutationTools(server: McpServer) {
         ],
       };
     },
+    { idempotent: true },
   );
 
   writeTool(
@@ -107,6 +109,7 @@ export function registerMutationTools(server: McpServer) {
         ],
       };
     },
+    { idempotent: true },
   );
 
   writeTool(
@@ -140,11 +143,12 @@ export function registerMutationTools(server: McpServer) {
         content: [
           {
             type: "text",
-            text: `Campaign budget ${budget_id} updated to ${amount_micros} micros ($${(amount_micros / 1e6).toFixed(2)})`,
+            text: `Campaign budget ${budget_id} updated to ${amount_micros} micros (${(amount_micros / 1e6).toFixed(2)} in account currency)`,
           },
         ],
       };
     },
+    { idempotent: true },
   );
 
   writeTool(

@@ -29,16 +29,25 @@ export function readTool<Args extends ZodRawShape>(
   );
 }
 
+/**
+ * Register a write tool. Pass `{ idempotent: true }` for "set X to Y" style mutations where
+ * repeating the call with the same arguments has no additional effect.
+ */
 export function writeTool<Args extends ZodRawShape>(
   server: McpServer,
   name: string,
   description: string,
   inputSchema: Args,
   handler: ToolCallback<Args>,
+  options: { idempotent?: boolean } = {},
 ) {
   return server.registerTool(
     name,
-    { description, inputSchema, annotations: WRITE },
+    {
+      description,
+      inputSchema,
+      annotations: { ...WRITE, idempotentHint: options.idempotent ?? false },
+    },
     handler,
   );
 }
