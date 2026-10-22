@@ -274,7 +274,7 @@ Enable with `GOOGLE_ADS_ENABLE_MUTATIONS=true`:
 | `GOOGLE_ADS_IMPERSONATION_EMAIL` | No | — | Service account impersonation email |
 | `GOOGLE_ADS_ENABLE_MUTATIONS` | No | `false` | Enable write tools |
 | `GOOGLE_ADS_ENV_FILE` | No | `.env` | Path to .env file (loaded if present, never overrides existing env) |
-| `GOOGLE_ADS_API_VERSION` | No | `v25` | Google Ads API version |
+| `GOOGLE_ADS_API_VERSION` | No | `v26` | Google Ads API version |
 
 ## Updates
 
